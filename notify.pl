@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+
 #===============================================================================
 #
 #         FILE:  notify.pl
@@ -22,22 +23,22 @@ use strict;
 use warnings;
 use utf8;
 use v5.10.1;
+use MIME::Lite;
+use MIME::Base64;
 
-use Net::SMTP;
+my $msg = MIME::Lite->new(
+	From => 'emrk@alwaysdata.net',
+	To => 'sviridenko.maxim@gmail.com',
+	Subject => 'Test servioce',
+	Data => 'Hello',
+);
 
-my $smtp = Net::SMTP->new(
-		Host => 'smtp.alwaysdata.com',
-		Debug => 1,
-	);
+MIME::Lite->send(
+	'smtp',
+	'smtp.alwaysdata.com',
+	Timeout => 30, 
+	AuthUser=> 'emrk@alwaysdata.net', 
+	AuthPass => 'qwer123',
+);
 
-$smtp->auth('emrk@alwaysdata.net','qwer123');
-$smtp->mail('emrk@alwaysdata.net');
-$smtp->to('sviridenko.maxim@gmail.com');
-
-$smtp->data();
-$smtp->datasend('To: sviridenko.maxim@gmail.com');
-$smtp->datasend("\n\n");
-$smtp->datasend("Hello World!\n");
-$smtp->dataend();
-
-$smtp->quit;
+$msg->send;
