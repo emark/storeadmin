@@ -26,7 +26,11 @@ use utf8;
 use v5.10.1;
 use MIME::Lite;
 
-open (DBCONF,"< app.conf") || die "Error open dbconfig file";
+
+my $basepath = $0;
+$basepath =~s/orders\.pl//;
+
+open (DBCONF,"< $basepath/app.conf") || die "Error open dbconfig file";
 my @appconf=<DBCONF>;
 close DBCONF;
 chomp @appconf;
