@@ -24,6 +24,7 @@ use CGI qw/:standard/;
 use DBIx::Custom;
 use utf8;
 use v5.10.1;
+use MIME::Lite;
 
 open (DBCONF,"< app.conf") || die "Error open dbconfig file";
 my @appconf=<DBCONF>;
@@ -40,6 +41,7 @@ my $dbi = DBIx::Custom->connect(
 $dbi->do('SET NAMES utf8');
 
 my $cmd = param('cmd') || '';
+my $notify = param('notify') || 0;
 
 print header(-charset => 'utf-8',
 		-type => 'text/html',
@@ -100,8 +102,8 @@ sub ReadOrders(){
 		print "<a href=\"orders.pl?cmd=ReadItems&orderid=$row->{'id'}\">See items</a> / ";
 		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=1&orderid=$row->{'id'}\">Complete</a> / ";
 		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=0&orderid=$row->{'id'}\">Uncomplete</a> / ";
-		#print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=2&orderid=$row->{'id'}\">Delete</a> / ";
 		print '</tr>';
+		&NotifyOrders if $notify;
 	};
 	print '</table>';
 };
@@ -151,4 +153,23 @@ sub ChangeOrderStatus(){
 	);
 	print p('Order status changed');
 	&ReadOrders($orderstatus);
+};
+
+sub NotifyOrders(){
+	my $msg = MIME::Lite->new(
+    	From => 'emrk@alwaysdata.net',
+	    To => 'sviridenko.maxim@gmail.com',
+    	Subject => 'New orders',
+	    Data => 'Hello, check for new orders! http://www.nastartshop.ru/cgi-bin/storeadmin/orders.pl?status=0',
+	);
+
+	MIME::Lite->send(
+    	'smtp',
+	    'smtp.alwaysdata.com',
+    	Timeout => 30,
+	    AuthUser=> 'emrk@alwaysdata.net',
+    	AuthPass => $appconf[3],
+	);
+
+	$msg->send;
 };
