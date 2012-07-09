@@ -45,7 +45,7 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
-my $cmd = param('cmd') || 'YMLCatalog';
+my $cmd = param('cmd') || '';
 my $notify = param('notify') || 0;
 
 print header(-charset => 'utf-8',
