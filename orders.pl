@@ -45,7 +45,7 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
-my $cmd = param('cmd') || '';
+my $cmd = param('cmd') || 'YMLCatalog';
 my $notify = param('notify') || 0;
 
 print header(-charset => 'utf-8',
@@ -207,7 +207,10 @@ HEADER
 
 	my $category = $dbi->select(
         table => 'catalog',
-        column => 'title',
+        column => [
+			'title',
+			'url',
+		],
         where => {'type' => 0}
     );
 
@@ -219,7 +222,7 @@ HEADER
 		print YML<<CATEGORY;
 <category id="$id">$cattitle</category>
 CATEGORY
-		$categoryid{$row->{'title'}} = $id;#Set category Id
+		$categoryid{$row->{'url'}} = $id;#Set category Id
 	};	
     print YML "</categories>\n";
 	print YML "<offers>\n";
