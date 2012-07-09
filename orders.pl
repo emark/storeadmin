@@ -23,7 +23,6 @@ use warnings;
 use CGI qw/:standard/;
 use DBIx::Custom;
 use utf8;
-use Encode;
 use v5.10.1;
 use MIME::Lite;
 
@@ -183,7 +182,7 @@ sub NotifyOrders(){
 };
 
 sub YMLCatalog{
-	my $catfile = 'upload/catalog.yml';
+	my $catfile = 'upload/utf_catalog.yml';
 	my @adate = localtime(time);
 	$adate[5] = $adate[5]+1900;
 	$adate[4] = $adate[4]+1;
@@ -216,7 +215,7 @@ HEADER
 	my $id = 0;
 	while(my $row = $category->fetch_hash){
 		$id++;
-		my $cattitle = Encode::encode("windows-1251",$row->{'title'});
+		my $cattitle = $row->{'title'};
 		print YML<<CATEGORY;
 <category id="$id">$cattitle</category>
 CATEGORY
