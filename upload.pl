@@ -40,6 +40,7 @@ $dbi->do('SET NAMES utf8');
 
 my $file_handle = upload('source') ||undef;
 my $export = param('export') || undef;
+my $lb = param('linebreak') || undef; #Select line break characters
 
 if($export){
 	print header(
@@ -56,6 +57,7 @@ if($export){
     print start_html;
     print start_form(-action => 'upload.pl',-method => 'post');
     print filefield(-name => 'source');
+    print checkbox(-name => 'linebreak',-value => 1, -label => 'OS Windows');
     print submit;
     print end_form;
 	&UploadStore;
@@ -77,6 +79,7 @@ sub UploadStore(){
 			my %counter = ('update' => 0, 'insert' => 0); #Counter for actions
 			while(<RFILE>){
 				chop $_;
+				chop $_ if $lb;
 				my ($url,$title,$description,$settings,$features,$image,$price,$instore,$anonse,$caturl) = split(';',$_);
 				my $result = $dbi->select(
 					table => 'product',
