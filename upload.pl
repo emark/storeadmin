@@ -80,7 +80,7 @@ sub UploadStore(){
 			while(<RFILE>){
 				chop $_;
 				chop $_ if $lb;
-				my ($url,$title,$description,$settings,$features,$image,$price,$instore,$anonse,$caturl) = split(';',$_);
+				my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$anonse,$caturl) = split(';',$_);
 				my $result = $dbi->select(
 					table => 'product',
 					column => 'id',
@@ -131,6 +131,7 @@ sub UploadStore(){
 
 sub ExportStore(){
 	my @columns = (
+					'id',
                     'url',
                     'title',
                     'description',
