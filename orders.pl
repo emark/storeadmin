@@ -242,7 +242,7 @@ CATEGORY
 	while(my $row = $offer->fetch_hash){
 		print YML<<OFFER;
 <offer id="$row->{'id'}">
-<url>http://www.nastartshop.ru/$row->{'caturl'}/$row->{'url'}.html</url>
+<url>http://www.nastartshop.ru/catalog/$row->{'caturl'}/$row->{'url'}.html</url>
 <price>$row->{'price'}</price>
 <currencyId>RUR</currencyId>
 <categoryId type="Own">$categoryid{$row->{'caturl'}}</categoryId>
