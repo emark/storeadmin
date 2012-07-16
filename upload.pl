@@ -80,7 +80,7 @@ sub UploadStore(){
 			while(<RFILE>){
 				chop $_;
 				chop $_ if $lb;
-				my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$anonse,$caturl) = split(';',$_);
+				my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$anonse,$caturl,$vk_album) = split(';',$_);
 				my $result = $dbi->select(
 					table => 'product',
 					column => 'id',
@@ -100,6 +100,7 @@ sub UploadStore(){
 							instore => $instore,
 							anonse => $anonse,
 							caturl => $caturl,
+							vk_album => $vk_album,
 						},
 						table => 'product',
 						where => {id => $id}
@@ -118,6 +119,7 @@ sub UploadStore(){
                             instore => $instore,
                             anonse => $anonse,
                             caturl => $caturl,
+							vk_album => $vk_album,
 	            	    },  
 		                table => 'product',
 					);
@@ -142,6 +144,7 @@ sub ExportStore(){
                     'instore',
                     'anonse',
                     'caturl',
+					'vk_album',
 	);
 	print join(';',@columns);
 	print "\n";
