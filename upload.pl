@@ -82,7 +82,7 @@ sub UploadStore(){
 				chop $_ if $lb;
 				my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$anonse,$caturl,$vk_album,$popular) = split(';',$_);
 				my $result = $dbi->select(
-					table => 'product',
+					table => 'products',
 					column => 'id',
 					where => {'url' => $url}
 				);
