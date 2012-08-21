@@ -119,7 +119,7 @@ sub ReadItems(){
 	print p('<a href="?">See all orders</a>');
 	my $orderid = $_[0];
 	my $result = $dbi->select(
-        table => 'item',
+        table => 'items',
         column => [
             'productid',
             'title',
