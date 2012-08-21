@@ -83,8 +83,8 @@ sub ReadOrders(){
 			'sysdate',
 			'id',
 			'orderstatus',
-			'deliveryid',
-			'paymentid',
+			'delivery',
+			'payment',
 		],
 		where => {'orderstatus' => $orderstatus},
 	);
