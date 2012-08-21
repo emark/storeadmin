@@ -82,11 +82,11 @@ sub ReadOrders(){
 			'address',
 			'sysdate',
 			'id',
-			'orderstatus',
+			'status',
 			'delivery',
 			'payment',
 		],
-		where => {'orderstatus' => $orderstatus},
+		where => {'status' => $orderstatus},
 	);
 	print '<table border=1>';
 	my $table_headers = $result->header;
@@ -154,7 +154,7 @@ sub ChangeOrderStatus(){
 	my $orderid = $_[0];
 	my $orderstatus = $_[1];
 	$dbi->update(
-		{orderstatus => $orderstatus},
+		{status => $orderstatus},
 		table => 'orders',
 		where => {id => $orderid}
 	);
