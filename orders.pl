@@ -206,7 +206,7 @@ HEADER
 	print YML "<categories>\n";
 
 	my $category = $dbi->select(
-        table => 'catalog',
+        table => 'pages',
         column => [
 			'title',
 			'url',
@@ -228,7 +228,7 @@ CATEGORY
 	print YML "<offers>\n";
 	
 	my $offer = $dbi->select(
-		table => 'product',
+		table => 'products',
 		column => [
 			'id',
 			'url',
