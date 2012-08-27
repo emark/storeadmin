@@ -1,22 +1,4 @@
 #!/usr/bin/perl -w
-#===============================================================================
-#
-#         FILE:  orders.pl
-#
-#        USAGE:  ./orders.pl  
-#
-#  DESCRIPTION:  
-#
-#      OPTIONS:  ---
-# REQUIREMENTS:  ---
-#         BUGS:  ---
-#        NOTES:  ---
-#       AUTHOR:  MaximSviridenko (sm), sviridenko.maxim@gmail.com
-#      COMPANY:  E-marketing
-#      VERSION:  1.0
-#      CREATED:  07/02/2012 01:01:47 PM
-#     REVISION:  ---
-#===============================================================================
 
 use strict;
 use warnings;
@@ -246,6 +228,7 @@ CATEGORY
 <price>$row->{'price'}</price>
 <currencyId>RUR</currencyId>
 <categoryId type="Own">$categoryid{$row->{'caturl'}}</categoryId>
+<picture>http://www.nastartshop.ru/media/products/middle/$row->{'url'}.jpg</picture>
 <delivery>true</delivery>
 <name>$row->{'title'}</name>
 </offer>
