@@ -1,22 +1,4 @@
 #!/usr/bin/perl -w
-#===============================================================================
-#
-#         FILE:  upload.pl
-#
-#        USAGE:  ./upload.pl  
-#
-#  DESCRIPTION:  
-#
-#      OPTIONS:  ---
-# REQUIREMENTS:  ---
-#         BUGS:  ---
-#        NOTES:  ---
-#       AUTHOR:  MaximSviridenko (sm), sviridenko.maxim@gmail.com
-#      COMPANY:  E-marketing
-#      VERSION:  1.0
-#      CREATED:  06/27/2012 11:51:42 AM
-#     REVISION:  ---
-#===============================================================================
 
 use strict;
 use warnings;
@@ -80,7 +62,7 @@ sub UploadStore(){
 			while(<RFILE>){
 				chop $_;
 				chop $_ if $lb;
-				my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$anonse,$caturl,$vk_album,$popular) = split(';',$_);
+				my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$metadescription,$caturl,$vk_album,$popular) = split(';',$_);
 				my $result = $dbi->select(
 					table => 'products',
 					column => 'id',
@@ -98,7 +80,7 @@ sub UploadStore(){
 							image => $image,
 							price => $price,
 							instore => $instore,
-							anonse => $anonse,
+							metadescription => $metadescription,
 							caturl => $caturl,
 							vk_album => $vk_album,
 							popular => $popular,
@@ -118,7 +100,7 @@ sub UploadStore(){
                             image => $image,
                             price => $price,
                             instore => $instore,
-                            anonse => $anonse,
+                            metadescription => $metadescription,
                             caturl => $caturl,
 							vk_album => $vk_album,
 							popular => $popular,
@@ -144,7 +126,7 @@ sub ExportStore(){
                     'image',
                     'price',
                     'instore',
-                    'anonse',
+                    'metadescription',
                     'caturl',
 					'vk_album',
 					'popular',
