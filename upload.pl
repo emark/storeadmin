@@ -5,6 +5,7 @@ use warnings;
 use CGI qw/:standard/;
 use DBIx::Custom;
 use utf8;
+use v5.14;
 
 open (DBCONF,"< app.conf") || die "Error open dbconfig file";
 my @appconf=<DBCONF>;
@@ -20,20 +21,19 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
-#reading schema files
-my $schema_src = '';
-
+my @schema_src = <schema/*>;
 #get cgi variables
 my $file_handle = upload('source') ||undef;
 my $schema = param('schema') || undef;
 my $export = param('export') || undef;
-my $lb = param('linebreak') || undef; #Select line break characters
+#select line break characters
+my $lb = param('linebreak') || undef;
 
 if($export){
 	print header(
 		-type => 'text/csv',
 		-charset => 'utf-8',
-		-attachment => 'exportstore.csv',
+		-attachment => 'products.csv',
 	);
 	&ExportStore;
 }else{
@@ -74,7 +74,7 @@ sub UploadStore(){
 					column => 'id',
 					where => {'url' => $url}
 				);
-				my $id = $result->value || 0;
+				$id = $result->value || 0;
 				if ($id){
 					$dbi->update(
 						{
