@@ -21,7 +21,7 @@ my $dbi = DBIx::Custom->connect(
 $dbi->do('SET NAMES utf8');
 
 #reading schema files
-my $schema_src;
+my $schema_src = '';
 
 #get cgi variables
 my $file_handle = upload('source') ||undef;
