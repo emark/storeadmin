@@ -20,7 +20,12 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
+#reading schema files
+my $schema_src;
+
+#get cgi variables
 my $file_handle = upload('source') ||undef;
+my $schema = param('schema') || undef;
 my $export = param('export') || undef;
 my $lb = param('linebreak') || undef; #Select line break characters
 
@@ -43,7 +48,8 @@ if($export){
     print submit;
     print end_form;
 	&UploadStore;
-    print p('<a href="?export=yes" target=_blank>Export store</a>');
+    print p('<a href="?export=yes" target=_blank>Export</a>');
+	print p('<a href="/">Open domain</a>');
     print end_html;
 };
 
