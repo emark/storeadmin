@@ -21,10 +21,10 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
-my @schema_src = <schema/*>;
+my @schema = <schema/*>;
+
 #get cgi variables
 my $file_handle = upload('source') ||undef;
-my $schema = param('schema') || undef;
 my $export = param('export') || undef;
 #select line break characters
 my $lb = param('linebreak') || undef;
@@ -35,7 +35,7 @@ if($export){
 		-charset => 'utf-8',
 		-attachment => 'products.csv',
 	);
-	&ExportStore;
+	&Export;
 }else{
 	print header(
 		-charset => 'utf-8',
@@ -43,27 +43,31 @@ if($export){
 	);
     print start_html;
     print start_form(-action => 'upload.pl',-method => 'post');
-    print filefield(-name => 'source');
+	print filefield(-name => 'source');
     print checkbox(-name => 'linebreak',-value => 1, -label => 'OS Windows');
-    print submit;
+    print submit(-value => 'Import');
     print end_form;
-	&UploadStore;
-    print p('<a href="?export=yes" target=_blank>Export</a>');
+	print start_form(-action => 'upload.pl', -method => 'post');
+
+	print submit(-value => 'Export');
+	print end_form;
+	&Upload;
 	print p('<a href="/">Open domain</a>');
     print end_html;
 };
 
-sub UploadStore(){
+sub Upload(){
 	if($file_handle){
 		my @source_file = <$file_handle>;
+		#drop column captions
 		shift @source_file;
-		open (WFILE,"> upload/store.csv") || die "Can't open source file for writing";
+		open (WFILE,"> upload/source.csv") || die "Can't open source file for writing";
 		foreach my $key(@source_file){
 			print WFILE "$key";
 		}
 		close WFILE;
 		
-		open(RFILE,"< upload/store.csv") || die "Can't open source file for reading";
+		open(RFILE,"< upload/source.csv") || die "Can't open source file for reading";
 			my %counter = ('update' => 0, 'insert' => 0); #Counter for actions
 			while(<RFILE>){
 				chop $_;
@@ -121,7 +125,7 @@ sub UploadStore(){
 	}
 }#UploadStore
 
-sub ExportStore(){
+sub Export(){
 	my @columns = (
 					'id',
                     'url',
