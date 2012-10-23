@@ -22,6 +22,7 @@ my $dbi = DBIx::Custom->connect(
 $dbi->do('SET NAMES utf8');
 
 my @schema = <schema/*>;
+my %colschema = {'id','url','title','description'};
 
 #get cgi variables
 my $file_handle = upload('source') ||undef;
@@ -30,10 +31,11 @@ my $export = param('export') || undef;
 my $lb = param('linebreak') || undef;
 
 if($export){
+	$export=~s/schema\///;
 	print header(
 		-type => 'text/csv',
 		-charset => 'utf-8',
-		-attachment => 'products.csv',
+		-attachment => $export.'.csv',
 	);
 	&Export;
 }else{
@@ -43,16 +45,16 @@ if($export){
 	);
     print start_html;
     print start_form(-action => 'upload.pl',-method => 'post');
-	print filefield(-name => 'source');
+    print filefield(-name => 'source');
     print checkbox(-name => 'linebreak',-value => 1, -label => 'OS Windows');
     print submit(-value => 'Import');
     print end_form;
-	print start_form(-action => 'upload.pl', -method => 'post');
-
-	print submit(-value => 'Export');
-	print end_form;
-	&Upload;
-	print p('<a href="/">Open domain</a>');
+    print start_form(-action => 'upload.pl', -method => 'post');
+    print popup_menu(-name => 'export', -values => [@schema]);
+    print submit(-value => 'Export');
+    print end_form;
+    &Upload;
+    print p('<a href="/">Open domain</a>');
     print end_html;
 };
 
@@ -72,7 +74,7 @@ sub Upload(){
 			while(<RFILE>){
 				chop $_;
 				chop $_ if $lb;
-				my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$metadescription,$caturl,$vk_album,$popular) = split(';',$_);
+				my @import_data = split(';',$_);
 				my $result = $dbi->select(
 					table => 'products',
 					column => 'id',
