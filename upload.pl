@@ -22,13 +22,21 @@ my $dbi = DBIx::Custom->connect(
 $dbi->do('SET NAMES utf8');
 
 my @schema = <schema/*>;
+my @schema_tpl = '';
+open (SCHEMA,"< schema/products") || die "can't load schema file";
+@schema_tpl = <SCHEMA>;
+close SCHEMA;
+chop @schema_tpl;
+#say @schema_tpl;
+#print @schema_tpl;
+#print '1';
 
-my $colschema = {'url','title'};
-$dbi->insert(
-	$colschema,
-	table => 'products',
-);
-exit;
+#my $colschema = {'url','title'};
+#$dbi->insert(
+#	$colschema,
+#	table => 'products',
+#);
+#exit;
 
 #get cgi variables
 my $file_handle = upload('source') ||undef;
@@ -80,49 +88,28 @@ sub Upload(){
 			while(<RFILE>){
 				chop $_;
 				chop $_ if $lb;
-				my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$metadescription,$caturl,$vk_album,$popular) = split(';',$_);
+				#my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$metadescription,$caturl,$vk_album,$popular) = split(';',$_);
+				my @import_data = split(';',$_);
+				my $data_structure = {};
+				my $n=0;
+				foreach my $key(@schema_tpl){
+					$data_structure->{$key}= $import_data[$n];
+					$n++;
+				}
 				my $result = $dbi->select(
 					table => 'products',
 					column => 'id',
-					where => {'url' => $url}
-				);
-				$id = $result->value || 0;
+					where => {'id' => $data_structure->{'id'}});
+				my $id = $result->value || 0;
 				if ($id){
 					$dbi->update(
-						{
-							url => $url,
-							title => $title,
-							description => $description,
-							settings => $settings,
-							features => $features,
-							image => $image,
-							price => $price,
-							instore => $instore,
-							metadescription => $metadescription,
-							caturl => $caturl,
-							vk_album => $vk_album,
-							popular => $popular,
-						},
+						$data_structure,
 						table => 'products',
-						where => {id => $id}
-					);
+						where => {id => $id});
 					$counter{'update'}++;
 				}else{
 					$dbi->insert(
-						{
-							url => $url,
-                            title => $title,
-                            description => $description,
-                            settings => $settings,
-                            features => $features,
-                            image => $image,
-                            price => $price,
-                            instore => $instore,
-                            metadescription => $metadescription,
-                            caturl => $caturl,
-							vk_album => $vk_album,
-							popular => $popular,
-	            	    },  
+						$data_structure,  
 		                table => 'products',
 					);
 					$counter{'insert'}++;
@@ -134,30 +121,15 @@ sub Upload(){
 }#UploadStore
 
 sub Export(){
-	my @columns = (
-					'id',
-                    'url',
-                    'title',
-                    'description',
-                    'settings',
-                    'features',
-                    'image',
-                    'price',
-                    'instore',
-                    'metadescription',
-                    'caturl',
-					'vk_album',
-					'popular',
-	);
-	print join(';',@columns);
+	print join(';',@schema_tpl);
 	print "\n";
 	my $products = $dbi->select(
 			table => 'products',
-			column => [@columns],
+			column => [@schema_tpl],
 		);
 
 	while(my $row = $products->fetch_hash){
-		foreach my $key (@columns){
+		foreach my $key (@schema_tpl){
 			print $row->{$key};
 			print ';';
 		}
