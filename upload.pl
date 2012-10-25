@@ -22,7 +22,13 @@ my $dbi = DBIx::Custom->connect(
 $dbi->do('SET NAMES utf8');
 
 my @schema = <schema/*>;
-my %colschema = {'id','url','title','description'};
+
+my $colschema = {'url','title'};
+$dbi->insert(
+	$colschema,
+	table => 'products',
+);
+exit;
 
 #get cgi variables
 my $file_handle = upload('source') ||undef;
@@ -74,7 +80,7 @@ sub Upload(){
 			while(<RFILE>){
 				chop $_;
 				chop $_ if $lb;
-				my @import_data = split(';',$_);
+				my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$metadescription,$caturl,$vk_album,$popular) = split(';',$_);
 				my $result = $dbi->select(
 					table => 'products',
 					column => 'id',
