@@ -118,7 +118,7 @@ sub Upload(){
 		print p("Statistics: update=$counter{'update'}, insert=$counter{'insert'}");
 		close RFILE;
 	}
-}#UploadStore
+}#Upload
 
 sub Export(){
 	print join(';',@schema_tpl);
@@ -135,4 +135,4 @@ sub Export(){
 		}
 		print "\n";
 	};
-}#ExportStore
+}#Export
