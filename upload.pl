@@ -31,7 +31,7 @@ chop @schema_tpl;
 #print @schema_tpl;
 #print '1';
 
-#my $colschema = {'url','title'};
+#my $colschema = {'url'=>'www','title'=>'update','id'=>'180'};
 #$dbi->insert(
 #	$colschema,
 #	table => 'products',
@@ -82,7 +82,7 @@ sub Upload(){
 			print WFILE "$key";
 		}
 		close WFILE;
-		
+		#import uploading source to database
 		open(RFILE,"< upload/source.csv") || die "Can't open source file for reading";
 			my %counter = ('update' => 0, 'insert' => 0); #Counter for actions
 			while(<RFILE>){
@@ -90,17 +90,19 @@ sub Upload(){
 				chop $_ if $lb;
 				#my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$metadescription,$caturl,$vk_album,$popular) = split(';',$_);
 				my @import_data = split(';',$_);
+				my $id = shift @import_data || 0;
+				shift @schema_tpl;
 				my $data_structure = {};
 				my $n=0;
 				foreach my $key(@schema_tpl){
 					$data_structure->{$key}= $import_data[$n];
 					$n++;
 				}
-				my $result = $dbi->select(
-					table => 'products',
-					column => 'id',
-					where => {'id' => $data_structure->{'id'}});
-				my $id = $result->value || 0;
+				#my $result = $dbi->select(
+				#	table => 'products',
+				#	column => 'id',
+				#	where => {'id' => $data_structure->{'id'}});
+				#my $id = $result->value || 0;
 				if ($id){
 					$dbi->update(
 						$data_structure,
