@@ -23,33 +23,21 @@ $dbi->do('SET NAMES utf8');
 
 my @schema = <schema/*>;
 my @schema_tpl = '';
-open (SCHEMA,"< schema/products") || die "can't load schema file";
-@schema_tpl = <SCHEMA>;
-close SCHEMA;
-chop @schema_tpl;
-#say @schema_tpl;
-#print @schema_tpl;
-#print '1';
-
-#my $colschema = {'url'=>'www','title'=>'update','id'=>'180'};
-#$dbi->insert(
-#	$colschema,
-#	table => 'products',
-#);
-#exit;
+my $src_table = '';
 
 #get cgi variables
-my $file_handle = upload('source') ||undef;
+my $file_handle = upload('source') || undef;
 my $export = param('export') || undef;
 #select line break characters
 my $lb = param('linebreak') || undef;
 
 if($export){
-	$export=~s/schema\///;
+	$src_table = $export;
+	$src_table=~s/schema\///;
 	print header(
 		-type => 'text/csv',
 		-charset => 'utf-8',
-		-attachment => $export.'.csv',
+		-attachment => $src_table.'.csv',
 	);
 	&Export;
 }else{
@@ -64,7 +52,7 @@ if($export){
     print submit(-value => 'Import');
     print end_form;
     print start_form(-action => 'upload.pl', -method => 'post');
-    print popup_menu(-name => 'export', -values => [@schema]);
+    print popup_menu(-name => 'export', -values => ['',@schema]);
     print submit(-value => 'Export');
     print end_form;
     &Upload;
@@ -72,61 +60,71 @@ if($export){
     print end_html;
 };
 
+sub GetSchema(){
+	open (SCHEMA,"< $_[0]") || die "can't load schema file";
+		@schema_tpl = <SCHEMA>;
+	close SCHEMA;
+	chop @schema_tpl;
+};
+
 sub Upload(){
 	if($file_handle){
 		my @source_file = <$file_handle>;
+		my %counter = ('update' => 0, 'insert' => 0); #counter for actions
 		#drop column captions
-		shift @source_file;
+		my $schema_upload = shift @source_file;
+		chop $schema_upload;
 		open (WFILE,"> upload/source.csv") || die "Can't open source file for writing";
 		foreach my $key(@source_file){
 			print WFILE "$key";
-		}
+		};
 		close WFILE;
-		#import uploading source to database
-		open(RFILE,"< upload/source.csv") || die "Can't open source file for reading";
-			my %counter = ('update' => 0, 'insert' => 0); #Counter for actions
-			while(<RFILE>){
-				chop $_;
-				chop $_ if $lb;
-				#my ($id,$url,$title,$description,$settings,$features,$image,$price,$instore,$metadescription,$caturl,$vk_album,$popular) = split(';',$_);
-				my @import_data = split(';',$_);
-				my $id = shift @import_data || 0;
-				shift @schema_tpl;
-				my $data_structure = {};
-				my $n=0;
-				foreach my $key(@schema_tpl){
-					$data_structure->{$key}= $import_data[$n];
-					$n++;
-				}
-				#my $result = $dbi->select(
-				#	table => 'products',
-				#	column => 'id',
-				#	where => {'id' => $data_structure->{'id'}});
-				#my $id = $result->value || 0;
-				if ($id){
-					$dbi->update(
-						$data_structure,
-						table => 'products',
-						where => {id => $id});
-					$counter{'update'}++;
-				}else{
-					$dbi->insert(
-						$data_structure,  
-		                table => 'products',
-					);
-					$counter{'insert'}++;
+		foreach my $key(@schema){
+			&GetSchema($key);
+			my $schema_tpl = join(';',@schema_tpl);
+			if ($schema_tpl eq $schema_upload){
+				$src_table = $key;
+			    $src_table=~s/schema\///;
+				#print p("Open source table: $src_table");
+				open(RFILE,"< upload/source.csv") || die "Can't open source file for reading";
+				while(<RFILE>){
+					chop $_;
+					chop $_ if $lb;
+					my @import_data = split(';',$_);
+					my $data_structure = {};
+					my $n=0;
+					foreach my $key(@schema_tpl){
+						$data_structure->{$key} = $import_data[$n];
+						$n++;
+					};
+					my $id = $data_structure->{'id'} || 0;
+					if ($id){
+						$dbi->update(
+							$data_structure,
+							table => $src_table,
+							where => {id => $id});
+						$counter{'update'}++;
+					}else{
+						$dbi->insert(
+							$data_structure,  
+		        	        table => $src_table,
+						);
+						$counter{'insert'}++;
+					};
 				};
+				close RFILE;	
 			};
+		};#foreach	
 		print p("Statistics: update=$counter{'update'}, insert=$counter{'insert'}");
-		close RFILE;
 	}
 }#Upload
 
 sub Export(){
+	&GetSchema($export);
 	print join(';',@schema_tpl);
 	print "\n";
 	my $products = $dbi->select(
-			table => 'products',
+			table => $src_table,
 			column => [@schema_tpl],
 		);
 
