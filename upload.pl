@@ -5,7 +5,7 @@ use warnings;
 use CGI qw/:standard/;
 use DBIx::Custom;
 use utf8;
-use v5.14;
+use v5.10;
 
 open (DBCONF,"< app.conf") || die "Error open dbconfig file";
 my @appconf=<DBCONF>;
