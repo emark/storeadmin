@@ -6,16 +6,10 @@ use CGI qw/:standard/;
 use DBIx::Custom;
 use utf8;
 use v5.10;
-
-open (DBCONF,"< app.conf") || die "Error open dbconfig file";
-my @appconf=<DBCONF>;
-close DBCONF;
-chomp @appconf;
+require 'pkg/Common.pm';
 
 my $dbi = DBIx::Custom->connect(
-            dsn => $appconf[0],
-            user => $appconf[1],
-            password => $appconf[2],
+            &Common::Config('dsn','user','password'),
             option => {mysql_enable_utf8=>1}
 );
 

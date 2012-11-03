@@ -8,7 +8,6 @@ use utf8;
 use v5.10.1;
 use MIME::Lite;
 
-
 my $basepath = $0;
 $basepath =~s/orders\.pl//;
 my $conf = $basepath.'app.conf';
