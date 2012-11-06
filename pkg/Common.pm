@@ -1,4 +1,4 @@
-package Common 0.1;
+package Common;
 use strict;
 BEGIN;
 
