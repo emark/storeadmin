@@ -2,27 +2,15 @@ package Common 0.1;
 use strict;
 BEGIN;
 
-&Config('user','password');
-sub Config{
-#my @selected = @_ || undef;
-#print @_;
-#exit;
+sub GetConfig{
+my %Cfg;
 open (DBCONF,"< app.conf") || die "Error open dbconfig file";
-my @appconf=<DBCONF>;
+while(<DBCONF>){
+my ($key,$value) = split('#',$_);
+chop $value;
+$Cfg{$key} = $value};
 close DBCONF;
-chomp @appconf;
-my %config = ();
-my $n = 0;
-for (@appconf){
-	my ($key,$value) = split('#',$appconf[$n]);
-	for (@_){
-		config{$key} = $value;
+return %Cfg};
 
-	$n++;
-};
-print %config;
-return %config;
-};
-
-#return 1;
+return 1;
 END;
