@@ -36,7 +36,7 @@ if($export){
 		-charset => 'utf-8',
 		-attachment => $src_table.'.csv',
 	);
-	&Export;
+	&Export();
 }else{
 	print header(
 		-charset => 'utf-8',
@@ -55,7 +55,7 @@ if($export){
     print popup_menu(-name => 'export', -values => ['',@schema]);
     print submit(-value => 'Export');
     print end_form;
-    Import();
+    &Import();
     print p('<a href="/">Open domain</a>');
     print end_html;
 };
