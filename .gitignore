@@ -2,3 +2,4 @@ upload/
 app.conf
 *.*~
 */*~
+schema/
