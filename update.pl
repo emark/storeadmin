@@ -131,7 +131,7 @@ if($file_handle){
 
 sub Export(){
 &GetSchema($export);
-print join(';',@schema_tpl);
+print join("\t",@schema_tpl);
 print "\n";
 my $products = $dbi->select(
 	table => $src_table,
@@ -139,6 +139,7 @@ my $products = $dbi->select(
 while(my $row = $products->fetch_hash){
 	foreach my $key (@schema_tpl){
 		print $row->{$key};
-		print ';'};
+		print "\t";
+	};
 	print "\n"}
 };
