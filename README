@@ -1,0 +1,8 @@
+Administrative scripts for webstore engine
+
+conf{
+dsn#DBI:mysql:database=DBNAME;host=localhost;
+user#USER
+password#PASSWORD
+apppwd#APPPWD
+}
