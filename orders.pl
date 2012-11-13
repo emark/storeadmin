@@ -6,7 +6,6 @@ use CGI qw/:standard/;
 use DBIx::Custom;
 use utf8;
 use v5.10.1;
-use MIME::Lite;
 require 'pkg/Common.pm';
 
 my $basepath = $0;
@@ -34,8 +33,6 @@ if($cmd eq 'ReadItems'){
 	&ReadItems(param('orderid'));
 }elsif($cmd eq 'ChangeOrderStatus'){
 	&ChangeOrderStatus(param('orderid'),param('orderstatus'));
-}elsif($cmd eq 'YMLCatalog'){
-	&YMLCatalog;
 }else{
 	&ReadOrders(param('orderstatus'));
 };
@@ -138,103 +135,4 @@ sub ChangeOrderStatus(){
 	);
 	print p('Order status changed');
 	&ReadOrders($orderstatus);
-};
-
-sub NotifyOrders(){
-	my $msg = MIME::Lite->new(
-    	From => 'emrk@alwaysdata.net',
-	    To => 'sviridenko.maxim@gmail.com',
-    	Subject => 'New orders',
-	    Data => 'Hello, check for new orders! http://www.nastartshop.ru/cgi-bin/storeadmin/orders.pl?status=0',
-	);
-
-	MIME::Lite->send(
-    	'smtp',
-	    'smtp.alwaysdata.com',
-    	Timeout => 30,
-	    AuthUser=> 'emrk@alwaysdata.net',
-    	AuthPass => $appcfg{'smtppwd'},
-	);
-
-	$msg->send;
-};
-
-sub YMLCatalog{
-	my $catfile = 'upload/utf_catalog.yml';
-	my @adate = localtime(time);
-	$adate[5] = $adate[5]+1900;
-	$adate[4] = $adate[4]+1;
-	$adate[4] = '0'.$adate[4] if($adate[4]<10);
-	$adate[3] = '0'.$adate[3] if($adate[3]<10);
-	my $cdate = $adate[5].'-'.$adate[4].'-'.$adate[3];
-
-	open (YML,"> $catfile") || die "Can't open fil: $catfile";
-	print YML<<HEADER;
-<?xml version="1.0" encoding="windows-1251"?>
-<!DOCTYPE yml_catalog SYSTEM "shops.dtd">
-<yml_catalog date="$cdate 00:01">
-<shop>
-<name>НаСтарт.рф</name>
-<company>ООО &quot;Электронный маркетинг&quot;</company>
-<url>http://www.nastartshop.ru/</url>
-<currencies>
-<currency id="RUR" rate="1" plus="0"/>
-</currencies>
-HEADER
-	print YML "<categories>\n";
-
-	my $category = $dbi->select(
-        table => 'pages',
-        column => [
-			'title',
-			'url',
-		],
-        where => {'type' => 0}
-    );
-
-	my %categoryid = ();
-	my $id = 0;
-	while(my $row = $category->fetch_hash){
-		$id++;
-		my $cattitle = $row->{'title'};
-		print YML<<CATEGORY;
-<category id="$id">$cattitle</category>
-CATEGORY
-		$categoryid{$row->{'url'}} = $id;#Set category Id
-	};	
-    print YML "</categories>\n";
-	print YML "<offers>\n";
-	
-	my $offer = $dbi->select(
-		table => 'products',
-		column => [
-			'id',
-			'url',
-			'title',
-			'price',
-			'instore',
-			'caturl',
-		],
-	);
-		
-	while(my $row = $offer->fetch_hash){
-		print YML<<OFFER;
-<offer id="$row->{'id'}">
-<url>http://www.nastartshop.ru/catalog/$row->{'caturl'}/$row->{'url'}.html</url>
-<price>$row->{'price'}</price>
-<currencyId>RUR</currencyId>
-<categoryId type="Own">$categoryid{$row->{'caturl'}}</categoryId>
-<picture>http://www.nastartshop.ru/media/products/middle/$row->{'url'}.jpg</picture>
-<delivery>true</delivery>
-<name>$row->{'title'}</name>
-</offer>
-OFFER
-	};	
-
-	print YML "</offers>\n";
-	print YML<<FOOTER;
-</shop>
-</yml_catalog>
-FOOTER
-	close YML;
 };
