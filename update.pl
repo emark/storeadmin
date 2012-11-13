@@ -79,7 +79,7 @@ if($file_handle){
 	close WFILE;
 	foreach my $key(@schema){
 		&GetSchema($key);
-		my $schema_tpl = join(';',@schema_tpl);
+		my $schema_tpl = join("\t",@schema_tpl);
 		if ($schema_tpl eq $schema_upload){
 			$src_table = $key;
 		    $src_table=~s/schema\///;
@@ -87,7 +87,7 @@ if($file_handle){
 			while(<RFILE>){
 				chop $_;
 				chop $_ if $lb;
-				my @import_data = split(';',$_);
+				my @import_data = split("\t",$_);
 				my $data_structure = {};
 				my $n=0;
 				foreach my $key(@schema_tpl){
@@ -106,7 +106,8 @@ if($file_handle){
 	        	        table => $src_table);
 					$counter{'insert'}++}};
 			close RFILE}};	
-	print p("Statistics: update=$counter{'update'}, insert=$counter{'insert'}")}};
+	print p("Statistics: update=$counter{'update'}, insert=$counter{'insert'}")}
+};
 
 sub Export(){
 &GetSchema($export);
@@ -119,4 +120,5 @@ while(my $row = $products->fetch_hash){
 	foreach my $key (@schema_tpl){
 		print $row->{$key};
 		print ';'};
-	print "\n"}};
+	print "\n"}
+};
