@@ -25,7 +25,7 @@ my $src_table = '';
 #get cgi variables
 my $file_handle = upload('source') || undef;
 my $export = param('export') || undef;
-#select line break characters
+my $duplicates = param('duplicates') || undef;
 my $lb = param('linebreak') || undef;
 
 if($export){
@@ -47,7 +47,8 @@ if($export){
 	print p('Import data: CSV => DB');
     print start_form(-action => 'update.pl',-method => 'post');
     print filefield(-name => 'source');
-    print checkbox(-name => 'linebreak',-value => 1, -label => 'OS Windows');
+	print checkbox(-name => 'duplicates',-value => 1,-label => 'Check for URL duplicates');
+    print checkbox(-name => 'linebreak',-value => 1,-label => 'OS Windows');
     print submit(-value => 'Import');
     print end_form;
 	print p('Export data: DB => CSV');
@@ -55,6 +56,7 @@ if($export){
     print popup_menu(-name => 'export', -values => ['',@schema]);
     print submit(-value => 'Export');
     print end_form;
+	print hr;
     &Import();
     print p('<a href="/">Open domain</a>');
     print end_html;
@@ -69,7 +71,7 @@ chop @schema_tpl};
 sub Import(){
 if($file_handle){
 	my @source_file = <$file_handle>;
-	my %counter = (update => 0, insert => 0); #counter for actions
+	my %counter = (update => 0, insert => 0, duplicates => 0, total => 0); #counter for actions
 	#drop column captions
 	my $schema_upload = shift @source_file;
 	chop $schema_upload;
@@ -81,8 +83,11 @@ if($file_handle){
 		&GetSchema($key);
 		my $schema_tpl = join("\t",@schema_tpl);
 		if ($schema_tpl eq $schema_upload){
+			my %duplicates = ();
 			$src_table = $key;
 		    $src_table=~s/schema\///;
+			print p("Schema is defined. Source table: [$src_table]");
+			print p("Checking for duplicates: ON") if $duplicates;
 			open(RFILE,"< upload/source.csv") || die "Can't open source file for reading";
 			while(<RFILE>){
 				chop $_;
@@ -94,20 +99,35 @@ if($file_handle){
 					$data_structure->{$key} = $import_data[$n];
 					$n++};
 				my $id = $data_structure->{'id'} || 0;
-				if ($id){
-					$dbi->update(
-						$data_structure,
-						table => $src_table,
-						where => {id => $id});
-					$counter{'update'}++}
-				else{
-					$dbi->insert(
-						$data_structure,  
-	        	        table => $src_table);
-					$counter{'insert'}++}};
-			close RFILE}};	
-	print p("Statistics: update=$counter{'update'}, insert=$counter{'insert'}")}
-};
+				$duplicates{$data_structure->{'url'}}++ if $duplicates;
+				if($duplicates{$data_structure->{'url'}} > 1){
+					$counter{'duplicates'}++;
+				}else{
+					if($id){
+						$dbi->update(
+							$data_structure,
+							table => $src_table,
+							where => {id => $id},
+						);
+						$counter{'update'}++;
+					}else{
+						$dbi->insert(
+							$data_structure,  
+	        		        table => $src_table,
+						);
+						$counter{'insert'}++;
+					};
+				};
+				$counter{'total'}++;
+			};
+			close RFILE;
+			foreach (keys %duplicates){
+				print p("[d] $_ = $duplicates{$_}") if $duplicates{$_} > 1;
+			};
+		};
+	};	
+	print p("Statistics: update=$counter{'update'}, insert=$counter{'insert'}, duplicates=$counter{'duplicates'}, total=$counter{'total'}");
+}};
 
 sub Export(){
 &GetSchema($export);
