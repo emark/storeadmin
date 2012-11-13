@@ -1,8 +1,10 @@
 Administrative scripts for webstore engine
 
-conf{
+Configuration file schema{
 dsn#DBI:mysql:database=DBNAME;host=localhost;
 user#USER
 password#PASSWORD
 apppwd#APPPWD
 }
+
+For CSV updates use '{TAB}' separator.
