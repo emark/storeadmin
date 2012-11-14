@@ -103,7 +103,7 @@ if($file_handle){
 				if($duplicates{$data_structure->{'url'}} > 1){
 					$counter{'duplicates'}++;
 				}else{
-					if($id){
+					if($id != 0){
 						$dbi->update(
 							$data_structure,
 							table => $src_table,
@@ -126,7 +126,10 @@ if($file_handle){
 			};
 		};
 	};	
-	print p("Statistics: update=$counter{'update'}, insert=$counter{'insert'}, duplicates=$counter{'duplicates'}, total=$counter{'total'}");
+	print p('Statistics:');
+	foreach (keys %counter){
+		print "$_: $counter{$_}<br />";
+	};
 }};
 
 sub Export(){
