@@ -77,7 +77,7 @@ while(my $row = $offer->fetch_hash){
 <price>$row->{'price'}</price>
 <currencyId>RUR</currencyId>
 <categoryId type="Own">$categoryid{$row->{'caturl'}}</categoryId>
-<picture>http://www.nastartshop.ru/media/products/middle/$row->{'url'}.jpg</picture>
+<picture>http://www.nastartshop.ru/media/products/thumb/$row->{'url'}.jpg</picture>
 <delivery>true</delivery>
 <name>$row->{'title'}</name>
 </offer>
