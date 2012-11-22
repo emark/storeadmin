@@ -60,6 +60,7 @@ if($export){
     &Import();
     print p('<a href="/">Open domain</a>');
     print end_html;
+	print textarea;
 };
 
 sub GetSchema(){
