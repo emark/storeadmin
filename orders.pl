@@ -34,8 +34,8 @@ if($cmd eq 'ReadItems'){
 	&ReadItems(param('cartid'));
 }elsif($cmd eq 'ChangeOrderStatus'){
 	&ChangeOrderStatus(param('cartid'),param('orderstatus'));
-}elsif($cmd eq 'YMLCatalog'){
-	&YMLCatalog;
+}elsif($cmd eq 'ClearDeleted'){
+	&ClearDeleted;
 }else{
 	&ReadOrders(param('orderstatus'));
 };
@@ -92,6 +92,7 @@ sub ReadOrders(){
 		&NotifyOrders if $notify;
 	};
 	print '</table>';
+	print p('<a href="orders.pl?cmd=ClearDeleted">Clear deleted</a>') if ($orderstatus == 2);
 };
 
 sub ReadItems(){
@@ -138,4 +139,13 @@ sub ChangeOrderStatus(){
 	);
 	print p('Order status changed');
 	&ReadOrders($orderstatus);
+};
+
+sub ClearDeleted(){
+	$dbi->delete(
+		table => 'orders',
+		where => {status => 2}
+	);
+	print p('All deleted orders were cleared');
+	print p('<a href="orders.pl">Return back</a>');
 };
