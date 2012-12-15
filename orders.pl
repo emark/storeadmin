@@ -31,9 +31,9 @@ print header(-charset => 'utf-8',
 		);
 
 if($cmd eq 'ReadItems'){
-	&ReadItems(param('orderid'));
+	&ReadItems(param('cartid'));
 }elsif($cmd eq 'ChangeOrderStatus'){
-	&ChangeOrderStatus(param('orderid'),param('orderstatus'));
+	&ChangeOrderStatus(param('cartid'),param('orderstatus'));
 }elsif($cmd eq 'YMLCatalog'){
 	&YMLCatalog;
 }else{
@@ -63,6 +63,7 @@ sub ReadOrders(){
 			'status',
 			'delivery',
 			'payment',
+			'cartid',
 		],
 		where => {'status' => $orderstatus},
 	);
@@ -84,9 +85,9 @@ sub ReadOrders(){
 			print '</td>';
 		};
 		print '<td>';
-		print "<a href=\"orders.pl?cmd=ReadItems&orderid=$row->{'id'}\">See items</a> / ";
-		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=1&orderid=$row->{'id'}\">Complete</a> / ";
-		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=0&orderid=$row->{'id'}\">Uncomplete</a> / ";
+		print "<a href=\"orders.pl?cmd=ReadItems&cartid=$row->{'cartid'}\">See items</a> / ";
+		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=1&cartid=$row->{'cartid'}\">Complete</a> / ";
+		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=0&cartid=$row->{'cartid'}\">Uncomplete</a> / ";
 		print '</tr>';
 		&NotifyOrders if $notify;
 	};
@@ -95,7 +96,7 @@ sub ReadOrders(){
 
 sub ReadItems(){
 	print p('<a href="?">See all orders</a>');
-	my $orderid = $_[0];
+	my $cartid = $_[0];
 	my $result = $dbi->select(
         table => 'items',
         column => [
@@ -103,10 +104,9 @@ sub ReadItems(){
             'title',
             'count',
             'price',
-            'orderid',
 			'id',
         ],
-		where => {'orderid' => $orderid},
+		where => {cartid => $cartid},
     );
     print '<table border=1>';
     my $table_headers = $result->header;
@@ -125,116 +125,17 @@ sub ReadItems(){
         print '</tr>';
     };
     print '</table>';
-	print p("<a href=\"?cmd=ChangeOrderStatus&orderstatus=2&orderid=$orderid\">Delete order</a>");
+	print p("<a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">Delete order</a>");
 };
 
 sub ChangeOrderStatus(){
-	my $orderid = $_[0];
+	my $cartid = $_[0];
 	my $orderstatus = $_[1];
 	$dbi->update(
 		{status => $orderstatus},
 		table => 'orders',
-		where => {id => $orderid}
+		where => {cartid => $cartid}
 	);
 	print p('Order status changed');
 	&ReadOrders($orderstatus);
-};
-
-sub NotifyOrders(){
-	my $msg = MIME::Lite->new(
-    	From => 'emrk@alwaysdata.net',
-	    To => 'sviridenko.maxim@gmail.com',
-    	Subject => 'New orders',
-	    Data => 'Hello, check for new orders! http://www.nastartshop.ru/cgi-bin/storeadmin/orders.pl?status=0',
-	);
-
-	MIME::Lite->send(
-    	'smtp',
-	    'smtp.alwaysdata.com',
-    	Timeout => 30,
-	    AuthUser=> 'emrk@alwaysdata.net',
-    	AuthPass => $appcfg{'smtppwd'},
-	);
-
-	$msg->send;
-};
-
-sub YMLCatalog{
-	my $catfile = 'upload/utf_catalog.yml';
-	my @adate = localtime(time);
-	$adate[5] = $adate[5]+1900;
-	$adate[4] = $adate[4]+1;
-	$adate[4] = '0'.$adate[4] if($adate[4]<10);
-	$adate[3] = '0'.$adate[3] if($adate[3]<10);
-	my $cdate = $adate[5].'-'.$adate[4].'-'.$adate[3];
-
-	open (YML,"> $catfile") || die "Can't open fil: $catfile";
-	print YML<<HEADER;
-<?xml version="1.0" encoding="windows-1251"?>
-<!DOCTYPE yml_catalog SYSTEM "shops.dtd">
-<yml_catalog date="$cdate 00:01">
-<shop>
-<name>НаСтарт.рф</name>
-<company>ООО &quot;Электронный маркетинг&quot;</company>
-<url>http://www.nastartshop.ru/</url>
-<currencies>
-<currency id="RUR" rate="1" plus="0"/>
-</currencies>
-HEADER
-	print YML "<categories>\n";
-
-	my $category = $dbi->select(
-        table => 'pages',
-        column => [
-			'title',
-			'url',
-		],
-        where => {'type' => 0}
-    );
-
-	my %categoryid = ();
-	my $id = 0;
-	while(my $row = $category->fetch_hash){
-		$id++;
-		my $cattitle = $row->{'title'};
-		print YML<<CATEGORY;
-<category id="$id">$cattitle</category>
-CATEGORY
-		$categoryid{$row->{'url'}} = $id;#Set category Id
-	};	
-    print YML "</categories>\n";
-	print YML "<offers>\n";
-	
-	my $offer = $dbi->select(
-		table => 'products',
-		column => [
-			'id',
-			'url',
-			'title',
-			'price',
-			'instore',
-			'caturl',
-		],
-	);
-		
-	while(my $row = $offer->fetch_hash){
-		print YML<<OFFER;
-<offer id="$row->{'id'}">
-<url>http://www.nastartshop.ru/catalog/$row->{'caturl'}/$row->{'url'}.html</url>
-<price>$row->{'price'}</price>
-<currencyId>RUR</currencyId>
-<categoryId type="Own">$categoryid{$row->{'caturl'}}</categoryId>
-<picture>http://www.nastartshop.ru/media/products/middle/$row->{'url'}.jpg</picture>
-<delivery>true</delivery>
-<name>$row->{'title'}</name>
-</offer>
-OFFER
-	};	
-
-	print YML "</offers>\n";
-	print YML<<FOOTER;
-</shop>
-</yml_catalog>
-FOOTER
-	close YML;
 };
