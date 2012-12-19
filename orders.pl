@@ -23,20 +23,23 @@ my $dbi = DBIx::Custom->connect(
 $dbi->do('SET NAMES utf8');
 
 my $cmd = param('cmd') || '';
-my $notify = param('notify') || 0;
 
 print header(-charset => 'utf-8',
 		-type => 'text/html',
 		);
 
-if($cmd eq 'ReadItems'){
-	&ReadItems(param('cartid'));
-}elsif($cmd eq 'ChangeOrderStatus'){
-	&ChangeOrderStatus(param('cartid'),param('orderstatus'));
-}elsif($cmd eq 'ClearDeleted'){
-	&ClearDeleted;
-}else{
-	&ReadOrders(param('orderstatus'));
+for ($cmd){
+	if(/ReadItems/){
+		&ReadItems(param('cartid'));
+	}elsif(/ChangeOrderStatus/){
+		&ChangeOrderStatus(param('cartid'),param('orderstatus'));
+	}elsif(/ClearDeleted/){
+		&ClearDeleted;
+	}elsif(/Cart/){
+		&Cart;
+	}else{
+		&ReadOrders(param('orderstatus'));
+	};
 };
 
 sub ReadOrders(){
@@ -49,6 +52,7 @@ sub ReadOrders(){
 	foreach my  $key (keys %order_status){
 		print "<a href=\"?orderstatus=$key\">$order_status{$key}</a> | ";
 	};
+	print "<a href=\"orders.pl?cmd=Cart\">Cart</a>";
 	print p('Order status = '.$order_status{$orderstatus});
 	my $result = $dbi->select(
 		table => 'orders',
@@ -74,7 +78,7 @@ sub ReadOrders(){
 		print $key;
 		print '</th>';
 	};
-	print '<th>Action</th>';
+	print '<th>action</th>';
 	print '</tr>';
 	while(my $row = $result->fetch_hash){
 		print '<tr>';
@@ -88,10 +92,21 @@ sub ReadOrders(){
 		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=1&cartid=$row->{'cartid'}\">Complete</a> / ";
 		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=0&cartid=$row->{'cartid'}\">Uncomplete</a> / ";
 		print '</tr>';
-		&NotifyOrders if $notify;
 	};
 	print '</table>';
 	print p('<a href="orders.pl?cmd=ClearDeleted">Clear deleted</a>') if ($orderstatus == 2);
+};
+
+sub Cart(){
+	print p('<a href="orders.pl">Return back</a>');
+	my $result = $dbi->select(
+		table => 'cart',
+	);
+	print '<table border=1>';
+	while(my $row = $result->fetch_hash){
+	print "<tr><td>$row->{productid}</td><td>".localtime($row->{cartid})."</td><td>$row->{cartid}</td></tr>";
+	};
+	print '</table>';
 };
 
 sub ReadItems(){
