@@ -27,6 +27,8 @@ my $file_handle = upload('source') || undef;
 my $export = param('export') || undef;
 my $duplicates = param('duplicates') || undef;
 my $lb = param('linebreak') || undef;
+my $refresh = param('refresh') || undef;
+my $editscheme = param('editscheme') || undef;
 
 if($export){
 	$src_table = $export;
@@ -44,30 +46,42 @@ if($export){
 	);
     print start_html(-title => 'Data update manager');
 	print h1('Data update manager');
+    print p('<a href="http://'.$ENV{HTTP_HOST}.'">http://'.$ENV{HTTP_HOST}.'</a>');
 	print p('Import data: CSV => DB');
     print start_form(-action => 'update.pl',-method => 'post');
     print filefield(-name => 'source');
+	print checkbox(-name => 'refresh', -value => 1,-label => 'Refresh date');
 	print checkbox(-name => 'duplicates',-value => 1,-label => 'Check for URL duplicates');
     print checkbox(-name => 'linebreak',-value => 1,-label => 'OS Windows');
     print submit(-value => 'Import');
     print end_form;
+	print hr;
 	print p('Export data: DB => CSV');
     print start_form(-action => 'update.pl', -method => 'post');
     print popup_menu(-name => 'export', -values => ['',@schema]);
+	print checkbox(-name => 'editscheme', -value => 1, -label => 'Edit scheme');
     print submit(-value => 'Export');
     print end_form;
-	print hr;
+	&SchemaEdit;
     &Import();
-    print p('<a href="/">Open domain</a>');
+	print p('Script executed at '.localtime);
     print end_html;
-	print textarea;
+};
+
+sub SchemaEdit(){
+print p('Schema editor');
+print start_form();
+print textarea(-name => 'schema', -default=>$_[0]);
+print submit(-value => 'Save');
+print end_form;
 };
 
 sub GetSchema(){
 open (SCHEMA,"< $_[0]") || die "Can't load schema file";
 @schema_tpl = <SCHEMA>;
 close SCHEMA;
-chop @schema_tpl};
+chop @schema_tpl
+};
 
 sub Import(){
 if($file_handle){
@@ -88,7 +102,8 @@ if($file_handle){
 			$src_table = $key;
 		    $src_table=~s/schema\///;
 			print p("Schema is defined. Source table: [$src_table]");
-			print p("Checking for duplicates: ON") if $duplicates;
+			print p('Checking for duplicates: ON') if $duplicates;
+			print p('Refresh dates: ON') if $refresh;
 			open(RFILE,"< upload/source.csv") || die "Can't open source file for reading";
 			while(<RFILE>){
 				chop $_;
@@ -98,7 +113,9 @@ if($file_handle){
 				my $n=0;
 				foreach my $key(@schema_tpl){
 					$data_structure->{$key} = $import_data[$n];
-					$n++};
+					$n++
+				};
+				$data_structure->{itemupdate} = \"NOW()" if $refresh;
 				my $id = $data_structure->{'id'} || 0;
 				$duplicates{$data_structure->{'url'}}++ if $duplicates;
 				if($duplicates{$data_structure->{'url'}} > 1){
@@ -146,4 +163,8 @@ while(my $row = $products->fetch_hash){
 		print "\t";
 	};
 	print "\n"}
+};
+
+sub SchemaEditor(){
+
 };
