@@ -6,7 +6,6 @@ use CGI qw/:standard/;
 use DBIx::Custom;
 use utf8;
 use v5.10.1;
-use MIME::Lite;
 require 'pkg/Common.pm';
 
 my $basepath = $0;
