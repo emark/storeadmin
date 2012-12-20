@@ -7,7 +7,6 @@ use utf8;
 use Mojo::UserAgent;
 use DBIx::Custom;
 use v5.10;
-require 'pkg/Common.pm';
 
 my $basepath = $0;
 $basepath =~s/notify\.pl//;
