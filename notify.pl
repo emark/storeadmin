@@ -9,6 +9,10 @@ use DBIx::Custom;
 use v5.10;
 require 'pkg/Common.pm';
 
+my $basepath = $0;
+$basepath =~s/notify\.pl//;
+my $conf = $basepath.'app.conf';
+
 my %appcfg = Common::GetConfig();
 my $dbi = DBIx::Custom->connect(
             dsn => $appcfg{'dsn'},
