@@ -68,6 +68,7 @@ sub ReadOrders(){
 			'payment',
 			'comments',
 			'cartid',
+			'notify',
 		],
 		where => {'status' => $orderstatus},
 	);

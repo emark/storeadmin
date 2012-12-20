@@ -25,7 +25,7 @@ sub CheckOrders(){
 my $result = $dbi->select(
 	table => 'orders',
 	columns => 'id',
-	where => { status => 0 },
+	where => { notify => 0 },
 );
 while (my $row = $result->fetch_hash){
 	$orderid = $row->{id};
@@ -37,7 +37,7 @@ while (my $row = $result->fetch_hash){
 
 sub ChangeStatus(){
 $dbi->update(
-	{ status => 1 },
+	{ notify => 1 },
 	table => 'orders',
 	where => { id => $orderid },
 );
@@ -45,5 +45,5 @@ $dbi->update(
 
 sub SendSMS(){
 my $ua = Mojo::UserAgent->new();
-$ua->get('http://api.sms24x7.ru/?method=push_msg&email=sviridenko.maxim@gmail.com&password=X53aRU1&text=New order#$orderid&phone=+79082087328&api_v=1.1&nologin=true&satellite_adv=if_exists');
+$ua->get("http://api.sms24x7.ru/?method=push_msg&email=sviridenko.maxim\@gmail.com&password=X53aRU1&text=Order_$orderid&phone=+79082087328&api_v=1.1&nologin=true&satellite_adv=if_exists&format=json");
 };
