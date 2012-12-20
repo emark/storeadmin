@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use lib "/home/hosting_locumtest/usr/local/lib/perl5";
 use warnings;
 use utf8;
 use Mojo::UserAgent;
