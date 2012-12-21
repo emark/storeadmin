@@ -28,8 +28,12 @@ my $export = param('export') || undef;
 my $duplicates = param('duplicates') || undef;
 my $lb = param('linebreak') || undef;
 my $lastmod = param('lastmod') || undef;
+my $allcolumns = param('allcolumns') || undef;
 my $editschema = param('editschema') || undef;
 my $schemacontent = param('schemacontent') || undef;
+
+#Developer zone
+#exit;
 
 if($export){
 	$src_table = $export;
@@ -60,6 +64,7 @@ if($export){
 	print p('Export data: DB => CSV');
     print start_form(-action => 'update.pl', -method => 'post');
     print popup_menu(-name => 'export', -values => [@schema]);
+	print checkbox(-name => 'allcolumns', -value => 1, -label => 'Export all columns');
     print submit(-value => 'Export');
     print end_form;
 	&SchemaEdit;
@@ -102,10 +107,17 @@ print end_form;
 };
 
 sub GetSchema(){
-open (SCHEMA,"< $_[0]") || die "Can't load schema file";
-@schema_tpl = <SCHEMA>;
-close SCHEMA;
-chop @schema_tpl;
+unless($allcolumns){
+	open (SCHEMA,"< $_[0]") || die "Can't load schema file: $_[0]";
+	@schema_tpl = <SCHEMA>;
+	close SCHEMA;
+	chop @schema_tpl;
+}else{
+	my $result = $dbi->select(
+		table => $src_table,
+	);
+	@schema_tpl = @{$result->header};
+};
 };
 
 sub Import(){
@@ -179,14 +191,15 @@ sub Export(){
 &GetSchema($export);
 print join("\t",@schema_tpl);
 print "\n";
-my $products = $dbi->select(
+my $result = $dbi->select(
 	table => $src_table,
-	column => [@schema_tpl]);
-	while(my $row = $products->fetch_hash){
-		foreach my $key (@schema_tpl){
-			print $row->{$key};
-			print "\t";
-		};
-		print "\n"
+	column => [@schema_tpl]
+);
+while(my $row = $result->fetch_hash){
+	foreach my $key (@schema_tpl){
+		print $row->{$key};
+		print "\t";
 	};
+	print "\n"
+};
 };
