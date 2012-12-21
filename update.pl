@@ -140,7 +140,7 @@ if($file_handle){
 					$data_structure->{$key} = $import_data[$n];
 					$n++
 				};
-				$data_structure->{lastmod} = \"NOW()" if $lastmod;
+				$data_structure->{'lastmod'} = \"NOW()" if $lastmod;
 				my $id = $data_structure->{'id'} || 0;
 				$duplicates{$data_structure->{'url'}}++ if $duplicates;
 				if($duplicates{$data_structure->{'url'}} > 1){
