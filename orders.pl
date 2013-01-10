@@ -46,14 +46,16 @@ sub ReadOrders(){
 	my $orderstatus = $_[0] || 0;
 	my %order_status = ( 
 		0 => 'Uncompleted',
-		1 => 'Completed',
+		1 => 'Accepted',
 		2 => 'Deleted',
+		3 => 'Complete',
 	);
-	foreach my  $key (keys %order_status){
-		print "<a href=\"?orderstatus=$key\">$order_status{$key}</a> | ";
+	my @sort = sort {$a <=> $b} keys %order_status;
+	foreach my  $key (@sort){
+		print "<a href=\"?orderstatus=$key\">$order_status{$sort[$key]}</a> | ";
 	};
 	print "<a href=\"orders.pl?cmd=Cart\">Cart</a>";
-	print p('Order status = '.$order_status{$orderstatus});
+	print h1($order_status{$orderstatus});
 	my $result = $dbi->select(
 		table => 'orders',
 		column => [
@@ -90,9 +92,10 @@ sub ReadOrders(){
 			print '</td>';
 		};
 		print '<td>';
-		print "<a href=\"orders.pl?cmd=ReadItems&cartid=$row->{'cartid'}\">See items</a> / ";
-		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=1&cartid=$row->{'cartid'}\">Complete</a> / ";
-		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=0&cartid=$row->{'cartid'}\">Uncomplete</a> / ";
+		print "<a href=\"orders.pl?cmd=ReadItems&cartid=$row->{'cartid'}\">Items</a> / ";
+		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=0&cartid=$row->{'cartid'}\">Uc</a> / ";
+		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=1&cartid=$row->{'cartid'}\">Ac</a> / ";
+		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=3&cartid=$row->{'cartid'}\">Co</a>";
 		print '</tr>';
 	};
 	print '</table>';
@@ -142,6 +145,7 @@ sub ReadItems(){
         print '</tr>';
     };
     print '</table>';
+	print p("<a href=\"mailer.pl?cartid=$cartid\">Send email notify</a>");
 	print p("<a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">Delete order</a>");
 };
 
