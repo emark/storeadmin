@@ -26,7 +26,7 @@ sub CheckOrders(){
 my $result = $dbi->select(
 	table => 'orders',
 	columns => 'id',
-	where => { notify => 0 },
+	where => {status => 0, notify => 0},
 );
 while (my $row = $result->fetch_hash){
 	$orderid = $row->{id};
