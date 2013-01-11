@@ -121,7 +121,7 @@ EOF
 
 print "\nCartID: $cartid\nStatus: ";
 if($rcpt){
-	#&SendMail;
+	&SendMail;
 }else{
 	print 'Empty email';
 };
