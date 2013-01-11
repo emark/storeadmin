@@ -25,7 +25,24 @@ my $subject = '';
 my $mb_txt = '';
 
 print header(-charset => 'utf8', -type => 'text');
-&StatusTemplate($cartid) if $cartid;
+
+if($cartid){
+	&StatusTemplate($cartid);
+}else{
+	&CheckAll;
+};
+
+sub CheckAll{
+my $result = $dbi->select(
+	table => 'orders',
+	column => 'cartid',
+	where => {status => 0, mailer => 0}
+);
+while(my $row = $result->fetch){
+	$cartid = $row->[0];
+	&StatusTemplate($cartid);
+};
+};
 
 sub SendMail(){
 my $ua = Mojo::UserAgent->new();
@@ -102,9 +119,15 @@ EOF
 #print $subject;
 #print $mb_txt;
 
+print "\nCartID: $cartid\nStatus: ";
 if($rcpt){
-	&SendMail;
+	#&SendMail;
 }else{
 	print 'Empty email';
 };
+$dbi->update(
+	{mailer => 1},
+	table => 'orders',
+	where => {cartid => $cartid},
+);
 };

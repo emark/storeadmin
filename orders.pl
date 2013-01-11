@@ -23,6 +23,7 @@ my $dbi = DBIx::Custom->connect(
 $dbi->do('SET NAMES utf8');
 
 my $cmd = param('cmd') || '';
+my $cartid = param('cartid') || 0;
 
 print header(-charset => 'utf-8',
 		-type => 'text/html',
@@ -30,7 +31,7 @@ print header(-charset => 'utf-8',
 
 for ($cmd){
 	if(/ReadItems/){
-		&ReadItems(param('cartid'));
+		&ReadItems($cartid);
 	}elsif(/ChangeOrderStatus/){
 		&ChangeOrderStatus(param('cartid'),param('orderstatus'));
 	}elsif(/ClearDeleted/){
@@ -45,10 +46,10 @@ for ($cmd){
 sub ReadOrders(){
 	my $orderstatus = $_[0] || 0;
 	my %order_status = ( 
-		0 => 'Uncompleted',
-		1 => 'Accepted',
-		2 => 'Deleted',
-		3 => 'Complete',
+		0 => 'Inbox',
+		1 => 'Active',
+		2 => 'Trash',
+		3 => 'Closed',
 	);
 	my @sort = sort {$a <=> $b} keys %order_status;
 	foreach my  $key (@sort){
@@ -58,20 +59,6 @@ sub ReadOrders(){
 	print h1($order_status{$orderstatus});
 	my $result = $dbi->select(
 		table => 'orders',
-		column => [
-			'person',
-			'tel',
-			'email',
-			'address',
-			'sysdate',
-			'id',
-			'status',
-			'delivery',
-			'payment',
-			'comments',
-			'cartid',
-			'notify',
-		],
 		where => {'status' => $orderstatus},
 	);
 	print '<table border=1>';
@@ -87,15 +74,17 @@ sub ReadOrders(){
 	while(my $row = $result->fetch_hash){
 		print '<tr>';
 		foreach my $key (@{$table_headers}){
-			print '<td>';
+			print '<td ';
+			print 'style="font-weight: bold"' if $cartid == $row->{cartid};
+			print '>';
 			print $row->{$key};
 			print '</td>';
 		};
 		print '<td>';
 		print "<a href=\"orders.pl?cmd=ReadItems&cartid=$row->{'cartid'}\">Items</a> / ";
-		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=0&cartid=$row->{'cartid'}\">Uc</a> / ";
-		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=1&cartid=$row->{'cartid'}\">Ac</a> / ";
-		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=3&cartid=$row->{'cartid'}\">Co</a>";
+		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=0&cartid=$row->{'cartid'}\">Ibx</a> / ";
+		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=1&cartid=$row->{'cartid'}\">Acv</a> / ";
+		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=3&cartid=$row->{'cartid'}\">Cls</a>";
 		print '</tr>';
 	};
 	print '</table>';
@@ -115,7 +104,7 @@ sub Cart(){
 };
 
 sub ReadItems(){
-	print p('<a href="?">See all orders</a>');
+	print p('<a href="?">Main page</a>');
 	my $cartid = $_[0];
 	my $result = $dbi->select(
         table => 'items',
