@@ -35,7 +35,7 @@ for ($cmd){
 	}elsif(/ChangeOrderStatus/){
 		&ChangeOrderStatus(param('cartid'),param('orderstatus'));
 	}elsif(/ClearDeleted/){
-		&ClearDeleted;
+		&ClearTrash;
 	}elsif(/Cart/){
 		&Cart;
 	}else{
@@ -88,7 +88,7 @@ sub ReadOrders(){
 		print '</tr>';
 	};
 	print '</table>';
-	print p('<a href="orders.pl?cmd=ClearDeleted">Clear deleted</a>') if ($orderstatus == 2);
+	print p('<a href="orders.pl?cmd=ClearTrash">Clear Trash</a>') if ($orderstatus == 2);
 };
 
 sub Cart(){
@@ -135,7 +135,7 @@ sub ReadItems(){
     };
     print '</table>';
 	print p("<a href=\"mailer.pl?cartid=$cartid\">Send email notify</a>");
-	print p("<a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">Delete order</a>");
+	print p("<a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">In Trash</a>");
 };
 
 sub ChangeOrderStatus(){
@@ -150,11 +150,11 @@ sub ChangeOrderStatus(){
 	&ReadOrders($orderstatus);
 };
 
-sub ClearDeleted(){
+sub ClearTrash(){
 	$dbi->delete(
 		table => 'orders',
 		where => {status => 2}
 	);
-	print p('All deleted orders were cleared');
+	print p('Trash were cleared');
 	print p('<a href="orders.pl">Return back</a>');
 };
