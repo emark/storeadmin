@@ -104,9 +104,41 @@ sub Cart(){
 };
 
 sub ReadItems(){
-	print p('<a href="?">Main page</a>');
+	print <<CSS;
+<style>
+\@media print{
+.noprint{
+	display:none;
+	}
+}
+div, table{
+	font-family: Arial, serif;
+	font-size: 12px;
+}
+table{
+	width:100%;
+}
+</style>
+CSS
+	print p('<a href="?" class=noprint>Main page</a>');
 	my $cartid = $_[0];
+	print '<div id="content">';
+	print '<table border=0><tr><td>';
+	print '<b>НаСтарт.РФ</b>, интернет-магазин<br />http://настарт.рф<br/>http://www.nastartshop.ru';
+	print '</td><td align=right>';
+	print '+7 (391) 292-02-29<br />hello@nastartshop.ru<br />ежедневно с 10:00 - 19:00';
+	print '</td></tr></table>';
+	print '<h2 align=center>Акт передачи товара</h2>';
 	my $result = $dbi->select(
+		table => 'orders',
+		where => {cartid => $cartid}
+	);
+	$result = $result->fetch_hash;
+	print "<p>Номер заказа: $result->{id} ($cartid)<br />";
+	print "Покупатель: частное лицо<br />";
+	print "Контактная информация: $result->{person}, $result->{tel}, $result->{address}";
+	print '</p>';
+	$result = $dbi->select(
         table => 'items',
         column => [
             'productid',
@@ -117,25 +149,29 @@ sub ReadItems(){
         ],
 		where => {cartid => $cartid},
     );
-    print '<table border=1>';
-    my $table_headers = $result->header;
-    foreach my $key (@{$table_headers}){
-        print '<th>';
-        print $key;
-        print '</th>';
-    };
+    print '<table border=1 cellpadding=5 cellspacing=0>';
+	print '<tr><th>№</th><th>Наименование</th><th>Артикул</th><th>Колич.</th><th>Цена</th><th>Сумма</th></tr>';
+	my $n = 1;
+	my $total = 0;
     while(my $row = $result->fetch_hash){
         print '<tr>';
-        foreach my $key (@{$table_headers}){
-            print '<td>';
-            print $row->{$key};
-            print '</td>';
-        };
+		print "<td>$n</td>";
+		print "<td>$row->{title}</td>";
+		print sprintf ("<td align=center>%06d</td>",$row->{productid});
+		print "<td align=right>$row->{count}</td>";
+		print "<td align=right>$row->{price}</td>";
+		print sprintf "<td align=right>%d</td>",$row->{count}*$row->{price};
         print '</tr>';
+		$n++;
+		$total = $total + $row->{count}*$row->{price};
     };
     print '</table>';
-	print p("<a href=\"mailer.pl?cartid=$cartid\">Send email notify</a>");
-	print p("<a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">In Trash</a>");
+	print "<h3>Итого: $total руб.</h3>";
+	print p('Товар получен и проверен. Претензий й к ассортименту, количеству, внешнему виду, комплектации товара не имею.');
+	print '<table border=0>';
+	print '<tr><td>От покупателя: ___________ /</td><td><pre>             </pre></td><td>От поставщика: __________ /</td></tr>';
+	print '</table></div>';
+	print "<p class=noprint><a href=\"mailer.pl?cartid=$cartid\">Send email notify</a><br /><br /><a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">In Trash</a>";
 };
 
 sub ChangeOrderStatus(){
