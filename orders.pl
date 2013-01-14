@@ -135,8 +135,8 @@ CSS
 	);
 	$result = $result->fetch_hash;
 	print "<p>Номер заказа: $result->{id} ($cartid)<br />";
-	print "Покупатель: частное лицо<br />";
-	print "Контактная информация: $result->{person}, $result->{tel}, $result->{address}";
+	print 'Поставщик: ООО "Электронный маркетинг", ИНН 2463213306<br />';
+	print "Покупатель: частное лицо $result->{person}, $result->{tel}, $result->{address}";
 	print '</p>';
 	$result = $dbi->select(
         table => 'items',
@@ -150,7 +150,7 @@ CSS
 		where => {cartid => $cartid},
     );
     print '<table border=1 cellpadding=5 cellspacing=0>';
-	print '<tr><th>№</th><th>Наименование</th><th>Артикул</th><th>Колич.</th><th>Цена</th><th>Сумма</th></tr>';
+	print '<tr><th>№</th><th>Наименование</th><th>Артикул</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr>';
 	my $n = 1;
 	my $total = 0;
     while(my $row = $result->fetch_hash){
@@ -159,14 +159,14 @@ CSS
 		print "<td>$row->{title}</td>";
 		print sprintf ("<td align=center>%06d</td>",$row->{productid});
 		print "<td align=right>$row->{count}</td>";
-		print "<td align=right>$row->{price}</td>";
-		print sprintf "<td align=right>%d</td>",$row->{count}*$row->{price};
+		print "<td align=right>$row->{price}-00</td>";
+		print sprintf "<td align=right>%d-00</td>",$row->{count}*$row->{price};
         print '</tr>';
 		$n++;
 		$total = $total + $row->{count}*$row->{price};
     };
     print '</table>';
-	print "<h3>Итого: $total руб.</h3>";
+	print "<h3>Итого: $total руб. 00 коп.</h3>";
 	print p('Товар получен и проверен. Претензий й к ассортименту, количеству, внешнему виду, комплектации товара не имею.');
 	print '<table border=0>';
 	print '<tr><td>От покупателя: ___________ /</td><td><pre>             </pre></td><td>От поставщика: __________ /</td></tr>';
