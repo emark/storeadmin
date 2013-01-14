@@ -126,9 +126,9 @@ CSS
 	print '<table border=0><tr><td>';
 	print '<b>НаСтарт.РФ</b>, интернет-магазин<br />http://настарт.рф<br/>http://www.nastartshop.ru';
 	print '</td><td align=right>';
-	print '+7 (391) 292-02-29<br />hello@nastartshop.ru<br />ежедневно с 10:00 - 19:00';
+	print '<b>+7 (391) 292-02-29</b><br />hello@nastartshop.ru<br />ежедневно с 10:00 - 19:00';
 	print '</td></tr></table>';
-	print '<h2 align=center>Акт передачи товара</h2>';
+	print '<h2 align=center>Акт приема-передачи товара</h2>';
 	my $result = $dbi->select(
 		table => 'orders',
 		where => {cartid => $cartid}
