@@ -135,7 +135,8 @@ CSS
 	);
 	$result = $result->fetch_hash;
 	print "<p>Номер заказа: $result->{id} ($cartid)<br />";
-	print 'Поставщик: ООО "Электронный маркетинг", ИНН 2463213306<br />';
+	print 'Продавец: ООО "Электронный маркетинг", ИНН 2463213306, 660028, Красноярск, Красноярский край, Россия,
+Телевизорная ул., д. 1, корп. 9<br />';
 	print "Покупатель: частное лицо $result->{person}, $result->{tel}, $result->{address}";
 	print '</p>';
 	$result = $dbi->select(
@@ -155,7 +156,7 @@ CSS
 	my $total = 0;
     while(my $row = $result->fetch_hash){
         print '<tr>';
-		print "<td>$n</td>";
+		print "<td align=center>$n</td>";
 		print "<td>$row->{title}</td>";
 		print sprintf ("<td align=center>%06d</td>",$row->{productid});
 		print "<td align=right>$row->{count}</td>";
@@ -167,9 +168,10 @@ CSS
     };
     print '</table>';
 	print "<h3>Итого: $total руб. 00 коп.</h3>";
-	print p('Товар получен и проверен. Претензий й к ассортименту, количеству, внешнему виду, комплектации товара не имею.');
+	print p('Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.');
+	print p('Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.');
 	print '<table border=0>';
-	print '<tr><td>От покупателя: ___________ /</td><td><pre>             </pre></td><td>От поставщика: __________ /</td></tr>';
+	print '<tr><td>Покупатель: ___________ /</td><td><pre>             </pre></td><td>Продавец: __________ /</td></tr>';
 	print '</table></div>';
 	print "<p class=noprint><a href=\"mailer.pl?cartid=$cartid\">Send email notify</a><br /><br /><a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">In Trash</a>";
 };
