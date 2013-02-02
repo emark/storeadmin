@@ -27,8 +27,13 @@ my $file_handle = upload('source') || undef;
 my $export = param('export') || undef;
 my $duplicates = param('duplicates') || undef;
 my $lb = param('linebreak') || undef;
-my $refresh = param('refresh') || undef;
-my $editscheme = param('editscheme') || undef;
+my $lastmod = param('lastmod') || undef;
+my $allcolumns = param('allcolumns') || undef;
+my $editschema = param('editschema') || undef;
+my $schemacontent = param('schemacontent') || undef;
+
+#Developer zone
+#exit;
 
 if($export){
 	$src_table = $export;
@@ -47,10 +52,10 @@ if($export){
     print start_html(-title => 'Data update manager');
 	print h1('Data update manager');
     print p('<a href="http://'.$ENV{HTTP_HOST}.'">http://'.$ENV{HTTP_HOST}.'</a>');
-	print p('Import data: CSV => DB');
+	print p('Import data: DB <= CSV');
     print start_form(-action => 'update.pl',-method => 'post');
     print filefield(-name => 'source');
-	print checkbox(-name => 'refresh', -value => 1,-label => 'Refresh date');
+	print checkbox(-name => 'lastmod', -value => 1,-label => 'Refresh date');
 	print checkbox(-name => 'duplicates',-value => 1,-label => 'Check for URL duplicates');
     print checkbox(-name => 'linebreak',-value => 1,-label => 'OS Windows');
     print submit(-value => 'Import');
@@ -58,8 +63,8 @@ if($export){
 	print hr;
 	print p('Export data: DB => CSV');
     print start_form(-action => 'update.pl', -method => 'post');
-    print popup_menu(-name => 'export', -values => ['',@schema]);
-	print checkbox(-name => 'editscheme', -value => 1, -label => 'Edit scheme');
+    print popup_menu(-name => 'export', -values => [@schema]);
+	print checkbox(-name => 'allcolumns', -value => 1, -label => 'Export all columns');
     print submit(-value => 'Export');
     print end_form;
 	&SchemaEdit;
@@ -69,18 +74,50 @@ if($export){
 };
 
 sub SchemaEdit(){
+print hr;
 print p('Schema editor');
-print start_form();
-print textarea(-name => 'schema', -default=>$_[0]);
+
+if ($editschema){
+	if($schemacontent){
+		my @tmp = split("\x0D\x0A",$schemacontent);#Escape URL CRLF
+		$schemacontent = join("\n",@tmp);
+		open(SCHEMA,"> $editschema") || die "Can't write to file: $editschema";
+		print SCHEMA $schemacontent;
+		print SCHEMA "\n";
+		close SCHEMA;
+		print p("Write schema content to $editschema");
+		
+	}else{
+		&GetSchema($editschema);
+		$schemacontent = join("\n",@schema_tpl);
+	};
+};
+
+print start_form(-action => 'update.pl', -method => 'post');
+print popup_menu(-name => 'editschema', -values => [@schema]);
+print submit(-value => 'Open');
+print end_form;
+print start_form(-action => 'update.pl', -method => 'post');
+print textfield(-name => 'editschema', -value=> $editschema);
+print p;
+print textarea(-name => 'schemacontent', -default => $schemacontent, -rows => 8);
+print '<br />';
 print submit(-value => 'Save');
 print end_form;
 };
 
 sub GetSchema(){
-open (SCHEMA,"< $_[0]") || die "Can't load schema file";
-@schema_tpl = <SCHEMA>;
-close SCHEMA;
-chop @schema_tpl
+unless($allcolumns){
+	open (SCHEMA,"< $_[0]") || die "Can't load schema file: $_[0]";
+	@schema_tpl = <SCHEMA>;
+	close SCHEMA;
+	chop @schema_tpl;
+}else{
+	my $result = $dbi->select(
+		table => $src_table,
+	);
+	@schema_tpl = @{$result->header};
+};
 };
 
 sub Import(){
@@ -103,7 +140,7 @@ if($file_handle){
 		    $src_table=~s/schema\///;
 			print p("Schema is defined. Source table: [$src_table]");
 			print p('Checking for duplicates: ON') if $duplicates;
-			print p('Refresh dates: ON') if $refresh;
+			print p('Refresh dates: ON') if $lastmod;
 			open(RFILE,"< upload/source.csv") || die "Can't open source file for reading";
 			while(<RFILE>){
 				chop $_;
@@ -115,7 +152,7 @@ if($file_handle){
 					$data_structure->{$key} = $import_data[$n];
 					$n++
 				};
-				$data_structure->{itemupdate} = \"NOW()" if $refresh;
+				$data_structure->{'lastmod'} = \"NOW()" if $lastmod;
 				my $id = $data_structure->{'id'} || 0;
 				$duplicates{$data_structure->{'url'}}++ if $duplicates;
 				if($duplicates{$data_structure->{'url'}} > 1){
@@ -154,17 +191,15 @@ sub Export(){
 &GetSchema($export);
 print join("\t",@schema_tpl);
 print "\n";
-my $products = $dbi->select(
+my $result = $dbi->select(
 	table => $src_table,
-	column => [@schema_tpl]);
-while(my $row = $products->fetch_hash){
+	column => [@schema_tpl]
+);
+while(my $row = $result->fetch_hash){
 	foreach my $key (@schema_tpl){
 		print $row->{$key};
 		print "\t";
 	};
-	print "\n"}
+	print "\n"
 };
-
-sub SchemaEditor(){
-
 };
