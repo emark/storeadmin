@@ -68,7 +68,10 @@ my $offer = $dbi->select(
 		'title',
 		'price',
 		'instore',
-		'caturl']);
+		'caturl',
+		'image',
+	],
+);
 
 while(my $row = $offer->fetch_hash){
 	print YML<<OFFER;
@@ -77,7 +80,9 @@ while(my $row = $offer->fetch_hash){
 <price>$row->{'price'}</price>
 <currencyId>RUR</currencyId>
 <categoryId type="Own">$categoryid{$row->{'caturl'}}</categoryId>
-<picture>http://www.nastartshop.ru/media/products/thumb/$row->{'url'}.jpg</picture>
+OFFER
+	print YML "<picture>http://www.nastartshop.ru/media/products/thumb/$row->{'url'}.jpg</picture>\n" if $row->{image};
+	print  YML<<OFFER
 <delivery>true</delivery>
 <name>$row->{'title'}</name>
 </offer>
