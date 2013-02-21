@@ -34,10 +34,12 @@ for ($cmd){
 		&ReadItems($cartid);
 	}elsif(/ChangeOrderStatus/){
 		&ChangeOrderStatus(param('cartid'),param('orderstatus'));
-	}elsif(/ClearDeleted/){
+	}elsif(/ClearTrash/){
 		&ClearTrash;
 	}elsif(/Cart/){
 		&Cart;
+	}elsif(/ReservedProducts/){
+		&ReservedProducts;
 	}else{
 		&ReadOrders(param('orderstatus'));
 	};
@@ -55,6 +57,7 @@ sub ReadOrders(){
 	foreach my  $key (@sort){
 		print "<a href=\"?orderstatus=$key\">$order_status{$sort[$key]}</a> | ";
 	};
+	print "<a href=\"orders.pl?cmd=ReservedProducts\">Reserved</a> | ";
 	print "<a href=\"orders.pl?cmd=Cart\">Cart</a>";
 	print h1($order_status{$orderstatus});
 	my $result = $dbi->select(
@@ -195,4 +198,25 @@ sub ClearTrash(){
 	);
 	print p('Trash were cleared');
 	print p('<a href="orders.pl">Return back</a>');
+};
+
+sub ReservedProducts(){
+	print '<h1>Reserved products</h1>';
+	print '<p><a href="orders.pl">Return back</a></p>';
+	my $result = $dbi->select(
+		table => 'items',
+		column => [
+			'items.title as title',
+			'items.count',
+			'items.price',
+			'items.cartid',
+		],
+		where => {'orders.status' => 1},
+		join => ['left join orders on orders.cartid=items.cartid']
+	);
+	print '<table border=1><tr><td>Товар</td><td>Колич.</td><td>Цена</td><td>Корзина</td></tr>';
+	while(my $row = $result->fetch_hash) {
+		print "<tr><td>$row->{title}</td><td>$row->{count}</td><td>$row->{price}</td><td>$row->{cartid}</td></tr>";
+	};
+	print '</table>';
 };
