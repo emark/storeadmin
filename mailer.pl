@@ -86,14 +86,20 @@ $result = $dbi->select(
 );
 $result = $result->fetch_hash;
 
+my $person = '';
+$person = ', '.$result->{person} if (length($result->{person})>0);
+
 $rcpt = $result->{email};
 $subject = "Заказ #$result->{id}";
+
 my $comments = '';
 $comments = "Комментарий к заказу: $result->{comments}\n" if $result->{comments};
+
 my $address = '';
 $address = "Адрес доставки: $result->{address}\n" if $result->{address};
+
 $mb_txt = <<EOF;
-Добрый день!
+Добрый день$person!
 Благодарим за обращение в наш магазин.
 
 Номер заказа: $result->{id}
@@ -121,6 +127,7 @@ http://www.nastartshop.ru/
 EOF
 #print $subject;
 #print $mb_txt;
+#exit;
 
 print "\nCartID: $cartid\nStatus: ";
 if($rcpt){
