@@ -31,7 +31,7 @@ my $result = $dbi->select(
 while (my $row = $result->fetch_hash){
 	$orderid = $row->{id};
 	my $tel = $row->{tel};
-	&SendSMS($tel);
+	&SendSMS($tel) if length($tel)>8;
 	&ChangeStatus;
 };
 };
