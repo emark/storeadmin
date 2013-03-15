@@ -49,7 +49,6 @@ my $ua = Mojo::UserAgent->new();
 my $tx = $ua->post_json('http://api.postmarkapp.com/email'=> {
 	From => 'hello@nastartshop.ru',
 	To => $rcpt,
-	Bcc => 'hello@nastartshop.ru',
 	Subject => $subject,
 	HtmlBody => '',
 	TextBody => $mb_txt,
@@ -66,6 +65,7 @@ my %dict = (
 	cash => 'наличный платеж',
 	check => 'банковский перевод',
 	yamoney => 'ПС Яндекс.Деньги',
+	credit => 'Оплата в кредит',
 );
 
 my $result = $dbi->select(
@@ -110,10 +110,13 @@ http://www.nastartshop.ru/cart/payment/$result->{cartid}/
 http://www.nastartshop.ru/about/delivery-and-payment.html
 -- 
 Интернет-магазин "НаСтарт.РФ"
-ежедневно c 10:00 до 19:00
-тел.: +7 (391) 292-02-29
+Мы работаем:
+ - Понедельник-Пятница c 11:00 до 19:00
+ - Суббота с 12:00 до 18:00
+skype: emrk.call
+телефон: +7 (391) 292-02-29
 почта: hello\@nastartshop.ru
-http://настарт.рф/
+http://настарт.рф/ 
 http://www.nastartshop.ru/
 EOF
 #print $subject;
