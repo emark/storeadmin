@@ -84,7 +84,7 @@ OFFER
 	print YML "<picture>http://www.nastartshop.ru/media/products/thumb/$row->{'url'}.jpg</picture>\n" if $row->{image};
 	print  YML<<OFFER
 <delivery>true</delivery>
-<name>$row->{'title'}</name>
+<name>$row->{'caption'}</name>
 </offer>
 OFFER
 };	
