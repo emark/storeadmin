@@ -44,14 +44,14 @@ print YML "<categories>\n";
 my $category = $dbi->select(
 	table => 'pages',
     column => [
-		'title',
+		'caption',
 		'url'],
 	where => {'type' => 0});
 my %categoryid = ();
 my $id = 0;
 while(my $row = $category->fetch_hash){
 	$id++;
-	my $cattitle = $row->{'title'};
+	my $cattitle = $row->{'caption'};
 	print YML<<CATEGORY;
 <category id="$id">$cattitle</category>
 CATEGORY
@@ -84,7 +84,7 @@ OFFER
 	print YML "<picture>http://www.nastartshop.ru/media/products/thumb/$row->{'url'}.jpg</picture>\n" if $row->{image};
 	print  YML<<OFFER
 <delivery>true</delivery>
-<name>$row->{'caption'}</name>
+<name>$row->{'title'}</name>
 </offer>
 OFFER
 };	
