@@ -143,7 +143,7 @@ if($file_handle){
 			print p('Refresh dates: ON') if $lastmod;
 			open(RFILE,"< upload/source.csv") || die "Can't open source file for reading";
 			while(<RFILE>){
-				#chop $_;
+				chop $_;
 				chop $_ if $lb;
 				my @import_data = split("\t",$_);
 				my $data_structure = {};
