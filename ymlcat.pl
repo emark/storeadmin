@@ -42,7 +42,7 @@ print YML<<HEADER;
 HEADER
 print YML "<categories>\n";
 my $category = $dbi->select(
-	table => 'pages',
+	table => 'catalog',
     column => [
 		'caption',
 		'url'],
