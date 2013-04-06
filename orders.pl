@@ -52,6 +52,7 @@ sub ReadOrders(){
 		1 => 'Active',
 		2 => 'Trash',
 		3 => 'Closed',
+		4 => 'Archive',
 	);
 	my @sort = sort {$a <=> $b} keys %order_status;
 	foreach my  $key (@sort){
@@ -87,7 +88,8 @@ sub ReadOrders(){
 		print "<a href=\"orders.pl?cmd=ReadItems&cartid=$row->{'cartid'}\">Items</a> / ";
 		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=0&cartid=$row->{'cartid'}\">Ibx</a> / ";
 		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=1&cartid=$row->{'cartid'}\">Acv</a> / ";
-		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=3&cartid=$row->{'cartid'}\">Cls</a>";
+		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=3&cartid=$row->{'cartid'}\">Cls</a> / ";
+		print "<a href=\"orders.pl?cmd=ChangeOrderStatus&orderstatus=4&cartid=$row->{'cartid'}\">Arch</a> / ";
 		print '</tr>';
 	};
 	print '</table>';
@@ -129,7 +131,7 @@ CSS
 	print '<table border=0><tr><td>';
 	print '<b>НаСтарт.РФ</b>, интернет-магазин<br />http://настарт.рф<br/>http://www.nastartshop.ru';
 	print '</td><td align=right>';
-	print '<b>+7 (391) 292-02-29</b><br />hello@nastartshop.ru<br />ежедневно с 10:00 - 19:00';
+	print '<b>+7 (391) 292-02-29</b><br />hello@nastartshop.ru<br />Пн-Пт с 11:00 - 19:00';
 	print '</td></tr></table>';
 	print '<h2 align=center>Акт приема-передачи товара</h2>';
 	my $result = $dbi->select(
@@ -137,9 +139,9 @@ CSS
 		where => {cartid => $cartid}
 	);
 	$result = $result->fetch_hash;
-	print "<p><b>Номер заказа:</b> $result->{id} ($cartid)<br />";
-	print '<b>Продавец:</b> ООО "Электронный маркетинг", ИНН 2463213306, 660028, Красноярск, Красноярский край, Россия,
-Телевизорная ул., д. 1, корп. 9<br />';
+	print "<p><b>Номер заказа:</b> $result->{id}-$cartid<br />";
+	print '<b>Продавец:</b> ООО "Электронный маркетинг", ИНН 2463213306, Красноярск,
+ул. Телевизорная,1с9<br />';
 	print "<b>Покупатель:</b> частное лицо $result->{person}, $result->{tel}, $result->{address}";
 	print '</p>';
 	$result = $dbi->select(
