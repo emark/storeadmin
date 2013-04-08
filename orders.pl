@@ -159,20 +159,28 @@ CSS
 	print '<tr><th>№</th><th>Наименование</th><th>Артикул</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr>';
 	my $n = 1;
 	my $total = 0;
+	my $total_cost = 0;
     while(my $row = $result->fetch_hash){
+		my $cost = $dbi->select(
+			table => 'products',
+			column => 'cost',
+			where => {id => $row->{productid}},
+		)->value;
         print '<tr>';
 		print "<td align=center>$n</td>";
 		print "<td>$row->{title}</td>";
 		print sprintf ("<td align=center>%06d</td>",$row->{productid});
 		print "<td align=right>$row->{count}</td>";
-		print "<td align=right>$row->{price}-00</td>";
-		print sprintf "<td align=right>%d-00</td>",$row->{count}*$row->{price};
+		print "<td align=right>$row->{price}-00<span align=right class=noprint> / $cost-00</span></td>";
+		print sprintf "<td align=right>%d-00<span align=right class=noprint> / %d-00</span></td>",$row->{count}*$row->{price},$row->{count}*$cost;
         print '</tr>';
 		$n++;
 		$total = $total + $row->{count}*$row->{price};
+		$total_cost =$total_cost + $cost * $row->{count};
     };
     print '</table>';
 	print "<h3>Итого: $total руб. 00 коп.</h3>";
+	print p({class => "noprint"},"Себестоимость: $total_cost");
 	print p('<b>Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b>');
 	print p('Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.');
 	print '<table border=0>';
