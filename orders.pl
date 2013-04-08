@@ -40,6 +40,8 @@ for ($cmd){
 		&Cart;
 	}elsif(/ReservedProducts/){
 		&ReservedProducts;
+	}elsif(/StoreView/){
+		&StoreView;
 	}else{
 		&ReadOrders(param('orderstatus'));
 	};
@@ -59,7 +61,8 @@ sub ReadOrders(){
 		print "<a href=\"?orderstatus=$key\">$order_status{$sort[$key]}</a> | ";
 	};
 	print "<a href=\"orders.pl?cmd=ReservedProducts\">Reserved</a> | ";
-	print "<a href=\"orders.pl?cmd=Cart\">Cart</a>";
+	print "<a href=\"orders.pl?cmd=Cart\">Cart</a> | ";
+	print "<a href=\"orders.pl?cmd=StoreView\">Store</a>";
 	print h1($order_status{$orderstatus});
 	my $result = $dbi->select(
 		table => 'orders',
@@ -229,4 +232,19 @@ sub ReservedProducts(){
 		print "<tr><td>$row->{title}</td><td>$row->{count}</td><td>$row->{price}</td><td>$row->{cartid}</td></tr>";
 	};
 	print '</table>';
+};
+
+sub StoreView(){
+	print '<h1>Products in store</h1>';
+    print '<p><a href="orders.pl">Return back</a></p>';
+    my $result = $dbi->select(
+        table => 'products',
+        column => ['id','title','instore','price','cost'],
+    );
+    print '<table border=1><tr><td>Арт.</td><td>Товар</td><td>Колич.</td><td>Цена с/с</td><td>Цена</td></tr>';
+    while(my $row = $result->fetch_hash) {
+        print "<tr><td>$row->{id}</td><td>$row->{title}</td><td>$row->{instore}</td><td>$row->{cost}</td><td>$row->{price}</td></tr>";
+    };
+    print '</table>';
+
 };
