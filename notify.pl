@@ -54,6 +54,6 @@ $ua->get("http://api.sms24x7.ru/?method=push_msg&email=sviridenko.maxim\@gmail.c
 };
 
 sub XMPPNotify(){
-my @args = "echo 'Noviy zakaz ($orderid)' | sendxmpp emrk\@jabber.org dsfqtn\@cloudim.ru";
+my @args = "echo 'Noviy zakaz ($orderid)' | sendxmpp emrkcorp\@jabber.ru dsfqtn\@cloudim.ru";
 system (@args) == 0 or die "Can't start programm";
 };
