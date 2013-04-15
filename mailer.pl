@@ -73,10 +73,10 @@ my %dict = (
 	credit => 'Оплата в кредит',
 );
 
-my $cyr_store = {
+my %cyr_storename = (
 	nastartshop => 'НаСтарт.РФ',
 	papatut => 'Папатут.РФ',
-};
+);
 
 my $result = $dbi->select(
 	table => 'items',
@@ -125,7 +125,7 @@ http://www.$storename.ru/cart/payment/$result->{cartid}/
 Все варианты оплаты и доставки заказа:
 http://www.$storename.ru/about/delivery-and-payment.html
 -- 
-Интернет-магазин "$cyr_store{$storename}"
+Интернет-магазин "$cyr_storename{$storename}"
 Мы работаем:
  - Понедельник-Пятница c 11:00 до 19:00
  - Суббота с 12:00 до 18:00

@@ -19,10 +19,10 @@ my $dbi = DBIx::Custom->connect(
 
 my $storename = $cfg{storename};
 
-my $cyr_storename = {
+my %cyr_storename = ( 
 	nastartshop => 'НаСтарт.РФ',
 	papatut => 'Папатут.РФ',
-};
+);
 
 $dbi->do('SET NAMES utf8');
 
