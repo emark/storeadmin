@@ -34,9 +34,9 @@ while (my $row = $result->fetch_hash){
 	$orderid = $row->{id};
 	$storename = $row->{storename};
 	my $tel = $row->{tel};
-	&SendSMS($tel) if length($tel)>8;
 	&XMPPNotify;
 	&ChangeStatus;
+	&SendSMS($tel) if length($tel)>8;
 };
 };
 
