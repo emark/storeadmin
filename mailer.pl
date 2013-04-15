@@ -19,7 +19,7 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
-my $storename = '';
+my $storename = param('storename') || '';
 my $cartid = param('cartid') || 0;
 my $rcpt = '';
 my $subject = '';
@@ -48,10 +48,11 @@ while(my $row = $result->fetch){
 
 sub SendMail(){
 my $ua = Mojo::UserAgent->new();
-my $token = {
+my %token = (
 	nastartshop => '8d104571-9db5-49a4-971e-9b1943f6c3b9',
-	papatut =>'a7a691ab-e39b-4245-affa-951275c3fbbf',
-};
+	papatut => 'a7a691ab-e39b-4245-affa-951275c3fbbf',
+);
+
 my $tx = $ua->post_json('http://api.postmarkapp.com/email'=> {
 	From => "hello\@$storename.ru",
 	To => $rcpt,

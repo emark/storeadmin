@@ -130,6 +130,14 @@ table{
 CSS
 	print p('<a href="?" class=noprint>Main page</a>');
 	my $cartid = $_[0];
+
+	my $result = $dbi->select(
+		table => 'orders',
+		where => {cartid => $cartid}
+	);
+	$result = $result->fetch_hash;
+
+	my $storename = $result->{storename};
 	print '<div id="content">';
 	print '<table border=0><tr><td>';
 	print '<b>НаСтарт.РФ</b>, интернет-магазин<br />http://настарт.рф<br/>http://www.nastartshop.ru';
@@ -137,11 +145,6 @@ CSS
 	print '<b>+7 (391) 292-02-29</b><br />hello@nastartshop.ru<br />Пн-Пт с 11:00 - 19:00';
 	print '</td></tr></table>';
 	print '<h2 align=center>Акт приема-передачи товара</h2>';
-	my $result = $dbi->select(
-		table => 'orders',
-		where => {cartid => $cartid}
-	);
-	$result = $result->fetch_hash;
 	print "<p><b>Номер заказа:</b> $result->{id}-$cartid<br />";
 	print '<b>Продавец:</b> ООО "Электронный маркетинг", ИНН 2463213306, Красноярск,
 ул. Телевизорная,1с9<br />';
@@ -189,7 +192,7 @@ CSS
 	print '<table border=0>';
 	print '<tr><td>Покупатель: ___________ /</td><td><pre>             </pre></td><td>Продавец: __________ /</td></tr>';
 	print '</table></div>';
-	print "<p class=noprint><a href=\"mailer.pl?cartid=$cartid\">Send email notify</a><br /><br /><a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">In Trash</a>";
+	print "<p class=noprint><a href=\"mailer.pl?cartid=$cartid&storename=$storename\">Send email notify</a><br /><br /><a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">In Trash</a>";
 };
 
 sub ChangeOrderStatus(){
