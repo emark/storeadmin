@@ -17,9 +17,11 @@ my $dbi = DBIx::Custom->connect(
             option => {mysql_enable_utf8=>1}
 );
 
+my $storename = $cfg{storename};
+
 $dbi->do('SET NAMES utf8');
 
-my $catfile = 'upload/utf_catalog.yml';
+my $catfile = "upload/$storename.yml";
 my @adate = localtime(time);
 $adate[5] = $adate[5]+1900;
 $adate[4] = $adate[4]+1;
@@ -35,7 +37,7 @@ print YML<<HEADER;
 <shop>
 <name>НаСтарт.рф</name>
 <company>ООО &quot;Электронный маркетинг&quot;</company>
-<url>http://www.nastartshop.ru/</url>
+<url>http://www.$storename.ru/</url>
 <currencies>
 <currency id="RUR" rate="1" plus="0"/>
 </currencies>
@@ -46,7 +48,7 @@ my $category = $dbi->select(
     column => [
 		'caption',
 		'url'],
-	where => {'type' => 0});
+	where => {storename => $storename});
 my %categoryid = ();
 my $id = 0;
 while(my $row = $category->fetch_hash){
@@ -71,17 +73,18 @@ my $offer = $dbi->select(
 		'caturl',
 		'image',
 	],
+	where => {storename => $storename},
 );
 
 while(my $row = $offer->fetch_hash){
 	print YML<<OFFER;
 <offer id="$row->{'id'}">
-<url>http://www.nastartshop.ru/catalog/$row->{'caturl'}/$row->{'url'}.html</url>
+<url>http://www.$storename.ru/catalog/$row->{'caturl'}/$row->{'url'}.html</url>
 <price>$row->{'price'}</price>
 <currencyId>RUR</currencyId>
 <categoryId type="Own">$categoryid{$row->{'caturl'}}</categoryId>
 OFFER
-	print YML "<picture>http://www.nastartshop.ru/media/products/thumb/$row->{'url'}.jpg</picture>\n" if $row->{image};
+	print YML "<picture>http://www.$storename.ru/media/products/thumb/$row->{'url'}.jpg</picture>\n" if $row->{image};
 	print  YML<<OFFER
 <delivery>true</delivery>
 <name>$row->{'title'}</name>
