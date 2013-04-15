@@ -134,7 +134,6 @@ http://www.$storename.ru/about/delivery-and-payment.html
 skype: emrk.call
 телефон: +7 (391) 292-02-29
 почта: hello\@$storename.ru
-http://настарт.рф/ 
 http://www.$storename.ru/
 EOF
 #print $subject;

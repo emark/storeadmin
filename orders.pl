@@ -138,11 +138,16 @@ CSS
 	$result = $result->fetch_hash;
 
 	my $storename = $result->{storename};
+	my %cyr_storename =	(
+		nastartshop => 'НаСтарт.РФ',
+		papatut => 'Папатут.РФ',
+	);
+
 	print '<div id="content">';
 	print '<table border=0><tr><td>';
-	print '<b>НаСтарт.РФ</b>, интернет-магазин<br />http://настарт.рф<br/>http://www.nastartshop.ru';
+	print "<b>$cyr_storename{$storename}</b>, интернет-магазин<br/>http://www.$storename.ru<br />hello\@$storename.ru";
 	print '</td><td align=right>';
-	print '<b>+7 (391) 292-02-29</b><br />hello@nastartshop.ru<br />Пн-Пт с 11:00 - 19:00';
+	print "<b>+7 (391) 292-02-29</b><br />Пн-Пт с 11:00 - 19:00<br />Сб. с 12:00 - 18:00";
 	print '</td></tr></table>';
 	print '<h2 align=center>Акт приема-передачи товара</h2>';
 	print "<p><b>Номер заказа:</b> $result->{id}-$cartid<br />";
