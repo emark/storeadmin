@@ -19,6 +19,11 @@ my $dbi = DBIx::Custom->connect(
 
 my $storename = $cfg{storename};
 
+my $cyr_storename = {
+	nastartshop => 'НаСтарт.РФ',
+	papatut => 'Папатут.РФ',
+};
+
 $dbi->do('SET NAMES utf8');
 
 my $catfile = "upload/$storename.yml";
@@ -35,7 +40,7 @@ print YML<<HEADER;
 <!DOCTYPE yml_catalog SYSTEM "shops.dtd">
 <yml_catalog date="$cdate 00:01">
 <shop>
-<name>НаСтарт.рф</name>
+<name>$cyr_storename{$storename}</name>
 <company>ООО &quot;Электронный маркетинг&quot;</company>
 <url>http://www.$storename.ru/</url>
 <currencies>
