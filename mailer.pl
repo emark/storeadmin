@@ -19,7 +19,7 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
-my $storename = $cfg{storename};
+my $storename = '';
 my $cartid = param('cartid') || 0;
 my $rcpt = '';
 my $subject = '';
@@ -36,11 +36,12 @@ if($cartid){
 sub CheckAll{
 my $result = $dbi->select(
 	table => 'orders',
-	column => 'cartid',
+	column => ['cartid','storename'],
 	where => {status => 0, mailer => 0}
 );
 while(my $row = $result->fetch){
 	$cartid = $row->[0];
+	$storename = $row->[1];
 	&StatusTemplate($cartid);
 };
 };

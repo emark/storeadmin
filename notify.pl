@@ -19,7 +19,7 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
-my $storename = $cfg{storename};
+my $storename = '';
 
 my $orderid = 0;
 &CheckOrders;
@@ -27,11 +27,12 @@ my $orderid = 0;
 sub CheckOrders(){
 my $result = $dbi->select(
 	table => 'orders',
-	column => ['id','tel'],
+	column => ['id','tel','storename'],
 	where => {status => 0, notify => 0},
 );
 while (my $row = $result->fetch_hash){
 	$orderid = $row->{id};
+	$storename = $row->{storename};
 	my $tel = $row->{tel};
 	&SendSMS($tel) if length($tel)>8;
 	&XMPPNotify;

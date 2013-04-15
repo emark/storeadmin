@@ -17,7 +17,7 @@ my $dbi = DBIx::Custom->connect(
             option => {mysql_enable_utf8=>1}
 );
 
-my $storename = $cfg{storename};
+my $storename = $ARGV[0];
 
 my %cyr_storename = ( 
 	nastartshop => 'НаСтарт.РФ',
