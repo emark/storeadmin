@@ -131,7 +131,6 @@ http://www.$storename.ru/about/delivery-and-payment.html
 Мы работаем:
  - Понедельник-Пятница c 11:00 до 19:00
  - Суббота с 12:00 до 18:00
-skype: emrk.call
 телефон: +7 (391) 292-02-29
 почта: hello\@$storename.ru
 http://www.$storename.ru/

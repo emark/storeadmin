@@ -19,46 +19,31 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
-my $storename = '';
 my $orderid = 0;
 
-&CheckOrders;
+print "Content-type: text/html\n\n";
+print &CheckOrders;
 
 sub CheckOrders(){
+my $r = 0;
 my $result = $dbi->select(
 	table => 'orders',
-	column => ['id','tel','storename'],
+	column => ['id'],
 	where => {status => 0, notify => 0},
 );
 while (my $row = $result->fetch_hash){
 	$orderid = $row->{id};
-	$storename = $row->{storename};
-	my $tel = $row->{tel};
-	&XMPPNotify;
-	&ChangeStatus;
-	&SendSMS($tel) if length($tel)>8;
+	$r = $orderid;
+	&ChangeStatus();
 };
+return $r;
 };
 
 sub ChangeStatus(){
 $dbi->update(
-	{notify => 1},
-	table => 'orders',
-	where => {id => $orderid},
+    {notify => 1},
+    table => 'orders',
+    where => {id => $orderid},
 );
 };
 
-sub SendSMS(){
-my $ua = Mojo::UserAgent->new();
-my $tel = $_[0];
-my $sender_name = $storename;
-my $decode_msg = "%D0%92%D0%B0%D1%88%20%D0%B7%D0%B0%D0%BA%D0%B0%D0%B7%20($orderid)%20%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD.%20%D0%A3%D0%B7%D0%BD%D0%B0%D0%B9%D1%82%D0%B5%20%D1%81%D0%BE%D1%81%D1%82%D0%BE%D1%8F%D0%BD%D0%B8%D0%B5%20%D0%B7%D0%B0%D0%BA%D0%B0%D0%B7%D0%B0%20%D0%BF%D0%BE%20%D1%82%D0%B5%D0%BB.%208%20(391)%2029-202-29";
-
-$ua->get("http://api.sms24x7.ru/?method=push_msg&email=sviridenko.maxim\@gmail.com&password=X53aRU1&sender_name=$sender_name&text=$decode_msg&phone=$tel&api_v=1.0&nologin=true&format=json");
-};
-
-sub XMPPNotify(){
-my $rcv = $appcfg{jabber};
-my @args = "echo 'Noviy zakaz ($orderid)/$storename' | sendxmpp $rcv";
-system (@args) == 0 or die "Can't start programm";
-};
