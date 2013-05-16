@@ -131,7 +131,7 @@ http://www.$storename.ru/about/delivery-and-payment.html
 Мы работаем:
  - Понедельник-Пятница c 11:00 до 19:00
  - Суббота с 12:00 до 18:00
-телефон: +7 (391) 203-03-10
+телефон: 8-(391)-203-03-10
 почта: hello\@$storename.ru
 http://www.$storename.ru/
 EOF
