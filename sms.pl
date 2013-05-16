@@ -51,7 +51,7 @@ sub SendSMS(){
 my $ua = Mojo::UserAgent->new();
 my $tel = $_[0];
 my $sender_name = $storename;
-my $decode_msg = "%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5.%20%D0%92%D0%B0%D1%88%20%D0%B7%D0%B0%D0%BA%D0%B0%D0%B7%20149%20%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD.%20%D0%98%D0%BD%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%20%D1%82.%208-391-203-03-10";
+my $decode_msg = "%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5.%20%D0%92%D0%B0%D1%88%20%D0%B7%D0%B0%D0%BA%D0%B0%D0%B7%20$orderid%20%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD.%20%D0%98%D0%BD%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%20%D1%82.%208-391-203-03-10";
 
 $ua->get("http://api.sms24x7.ru/?method=push_msg&email=sviridenko.maxim\@gmail.com&password=X53aRU1&sender_name=$sender_name&text=$decode_msg&phone=$tel&api_v=1.0&nologin=true&format=json");
 };
