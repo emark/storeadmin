@@ -86,11 +86,12 @@ my $result = $dbi->select(
 );
 my $items = '';
 my $total = 0;
+my $discount_base = 0;
 while(my $row = $result->fetch_hash){
 	$items = $items."$row->{title} - $row->{price} руб.\t$row->{count} шт.\t\n";
+	$discount_base = $discount_base + $row->{price}*$row->{count} if !$row->{discount};
 	$total = $total+($row->{count}*$row->{price});
 };
-
 
 $result = $dbi->select(
 	table => 'orders',
@@ -104,6 +105,22 @@ $person = ', '.$result->{person} if (length($result->{person})>0);
 $rcpt = $result->{email};
 $subject = "Заказ #$result->{id}";
 
+my $discount = '';
+if($result->{discount}){
+	$discount_rate = $dbi->select(
+		column => 'discount',
+		table => 'discounts',
+		where => {name => $result->{discount}},
+	)->value;
+	if($discount_rate){
+		my $discount_sum = sprintf("%d",$discount_base*$discount_rate/100);
+		$discount_sum = $total-$discount_sum;
+		$total = "$discount_sum руб., в том числе скидка: $discount_rate%\n"
+	};
+}else{
+	$total = $total.' руб.';
+};
+
 my $comments = '';
 $comments = "Комментарий к заказу: $result->{comments}\n" if $result->{comments};
 
@@ -116,7 +133,7 @@ $mb_txt = <<EOF;
 
 Номер заказа: $result->{id}
 $items---
-Итого (без доставки): $total руб.
+Итого (без доставки): $total
 $comments
 Доставка: $dict{$result->{'delivery'}}
 $address
@@ -135,6 +152,7 @@ http://www.$storename.ru/about/delivery-and-payment.html
 почта: hello\@$storename.ru
 http://www.$storename.ru/
 EOF
+
 #print $subject;
 #print $mb_txt;
 #exit;
