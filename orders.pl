@@ -187,10 +187,17 @@ CSS
 			table => 'discounts',
 			where => {name => $discount},
 		)->value;
-		my $discount_sum = sprintf("%d",$discount_base*$discount_rate);
+		my $discount_sum = 0;
+		if ($discount_rate < 1){
+			$discount_sum = sprintf("%d",$discount_base*$discount_rate);
+			$discount_rate = $discount_rate*100;
+			$discount_rate = $discount_rate.'%';
+		}else{
+			$discount_sum = $discount_rate;
+			$discount_rate = $discount_rate.' руб.';
+		};
 		$total = $total-$discount_sum;
-		$discount_rate = $discount_rate*100 if $discount_rate && $discount_rate < 1;
-		$total = "$total руб. в том числе скидка $discount_rate%",
+		$total = "$total руб. в том числе скидка $discount_rate",
 	}else{
 		$total = $total.' руб. 00 коп.';
 	};
