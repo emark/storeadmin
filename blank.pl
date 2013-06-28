@@ -34,7 +34,7 @@ my $total_sum = 0;
 if ($orderid){
 	$result = $dbi->select(
 		table => 'items',
-		column => ['price','count'],
+		column => ['price','count','discount'],
 		where => {cartid => $cartid}
 	);
 

@@ -187,8 +187,9 @@ CSS
 			table => 'discounts',
 			where => {name => $discount},
 		)->value;
-		my $discount_sum = sprintf("%d",$discount_base*$discount_rate/100);
+		my $discount_sum = sprintf("%d",$discount_base*$discount_rate);
 		$total = $total-$discount_sum;
+		$discount_rate = $discount_rate*100 if $discount_rate && $discount_rate < 1;
 		$total = "$total руб. в том числе скидка $discount_rate%",
 	}else{
 		$total = $total.' руб. 00 коп.';
