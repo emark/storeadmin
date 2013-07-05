@@ -130,6 +130,11 @@ table{
 CSS
 	print p('<a href="?" class=noprint>Main page</a>');
 	my $cartid = $_[0];
+	my @curdate = localtime(time);
+	$curdate[5] = $curdate[5] + 1900;
+	$curdate[4] = $curdate[4] + 1;
+	$curdate[4] = '0'.$curdate[4] if $curdate[4] < 10;
+	$curdate[3] = '0'.$curdate[3] if $curdate[3] < 10;
 
 	my $result = $dbi->select(
 		table => 'orders',
@@ -145,15 +150,12 @@ CSS
 
 	print '<div id="content">';
 	print '<table border=0><tr><td>';
-	print "<b>$cyr_storename{$storename}</b>, интернет-магазин<br/>http://www.$storename.ru<br />hello\@$storename.ru";
+	print 'ООО "Электронный маркетинг"<br />ИНН 2463213306<br />ОГРН 1092468020743<br />Юр. адрес: г .Красноярск, ул. Телевизорная,<br />дом 1 строение 9, пом. 31<br />Телефон: 8 (391) 203-03-10';
 	print '</td><td align=right>';
-	print "<b>+7 (391) 203-03-10 | 292-02-29</b><br />Пн-Пт с 11:00 - 19:00<br />Сб. с 12:00 - 18:00";
+	print "Интернет-магазин <b>$cyr_storename{$storename}</b><br/>http://www.$storename.ru<br />hello\@$storename.ru<br />";
+	print "8 (391) 203-03-10, 292-02-29<br />Пн-Пт с 11:00 - 19:00<br />Сб. с 12:00 - 18:00";
 	print '</td></tr></table>';
-	print '<h2 align=center>Акт передачи товара</h2>';
-	print "<p><b>Номер заказа:</b> $result->{id}-$cartid<br />";
-	print '<b>Продавец:</b> ООО "Электронный маркетинг", ИНН 2463213306, Красноярск,
-ул. Телевизорная,1с9<br />';
-	print "<b>Покупатель:</b> частное лицо $result->{person}, $result->{tel}, $result->{address}";
+	print "<h2 align=center>Товарный чек № $result->{id} от $curdate[3].$curdate[4].$curdate[5]г.</h2>";
 	print '</p>';
 	my $discount = $result->{discount};
 
@@ -162,7 +164,7 @@ CSS
 		where => {cartid => $cartid},
     );
     print '<table border=1 cellpadding=5 cellspacing=0>';
-	print '<tr><th>№</th><th>Наименование</th><th>Артикул</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr>';
+	print '<tr><th>№</th><th>Наименование</th><th>Артикул</th><th>Кол-во</th><th>Цена, руб.</th><th>Сумма, руб.</th></tr>';
 	my $n = 1;
 	my $total = 0;
 	my $discount_base = 0;
@@ -180,7 +182,8 @@ CSS
 		$discount_base = $discount_base + $row->{price}*$row->{count} if !$row->{discount};
     };
     print '</table>';
-
+	print '<p><center><b>Наличие кассового чека обязательно</b></center></p>';
+	
 	if($discount){
 		my $discount_rate = $dbi->select(
 			column => 'discount',
@@ -203,10 +206,10 @@ CSS
 	};
 	
 	print "<h3>Итого: $total </h3>";
-	print p('<b>Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b>');
-	print p('Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.');
-	print '<table border=0>';
-	print '<tr><td>Покупатель: ___________ /</td><td><pre>             </pre></td><td>Продавец: __________ /</td></tr>';
+	print p('<b>Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b><br />Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.');
+	print '<table>';
+	print '<tr><td>Покупатель</td><td>-----------------</td><td>/_____________/<br /><br /></td></tr>';
+	print '<tr><td>Продавец</td><td>-----------------</td><td>/_____________/</td></tr>';
 	print '</table></div>';
 	print "<p class=noprint><a href=\"mailer.pl?cartid=$cartid&storename=$storename\">Send email notify</a><br /><br /><a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">In Trash</a>";
 };
