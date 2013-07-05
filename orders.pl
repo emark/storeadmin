@@ -150,9 +150,9 @@ CSS
 
 	print '<div id="content">';
 	print '<table border=0><tr><td>';
-	print 'ООО "Электронный маркетинг"<br />ИНН 2463213306<br />ОГРН 1092468020743<br />Юр. адрес: г .Красноярск, ул. Телевизорная,<br />дом 1 строение 9, пом. 31<br />Телефон: 8 (391) 203-03-10';
+	print 'ООО "Электронный маркетинг"<br />ИНН 2463213306 ОГРН 1092468020743<br />Юр. адрес: г .Красноярск, ул. Телевизорная,<br />дом 1 строение 9, помещение 31<br />Телефон: 8 (391) 203-03-10';
 	print '</td><td align=right>';
-	print "Интернет-магазин <b>$cyr_storename{$storename}</b><br/>http://www.$storename.ru<br />hello\@$storename.ru<br />";
+	print "Интернет-магазин <b>$cyr_storename{$storename}</b><br/>http://www.$storename.ru<br />";
 	print "8 (391) 203-03-10, 292-02-29<br />Пн-Пт с 11:00 - 19:00<br />Сб. с 12:00 - 18:00";
 	print '</td></tr></table>';
 	print "<h2 align=center>Товарный чек № $result->{id} от $curdate[3].$curdate[4].$curdate[5]г.</h2>";
@@ -163,8 +163,9 @@ CSS
         table => 'items',
 		where => {cartid => $cartid},
     );
+
     print '<table border=1 cellpadding=5 cellspacing=0>';
-	print '<tr><th>№</th><th>Наименование</th><th>Артикул</th><th>Кол-во</th><th>Цена, руб.</th><th>Сумма, руб.</th></tr>';
+	print '<tr><th>№</th><th>Наименование</th><th>Арт.</th><th>Кол-во</th><th>Цена, руб.</th><th>Сумма, руб.</th><th>Дисконт, %</th></tr>';
 	my $n = 1;
 	my $total = 0;
 	my $discount_base = 0;
@@ -176,6 +177,7 @@ CSS
 		print "<td align=right>$row->{count}</td>";
 		print "<td align=right>$row->{price}-00</td>";
 		print sprintf "<td align=right>%d-00</td>",$row->{count}*$row->{price};
+		print "<td align=right>$row->{discount}</td>";
         print '</tr>';
 		$n++;
 		$total = $total + $row->{count}*$row->{price};
@@ -206,10 +208,11 @@ CSS
 	};
 	
 	print "<h3>Итого: $total </h3>";
-	print p('<b>Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b><br />Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.');
+	print p("Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b><br />Условия предоставления скидок размещены на странице http://www.$storename.ru/about/discounts.html");
 	print '<table>';
-	print '<tr><td>Покупатель</td><td>-----------------</td><td>/_____________/<br /><br /></td></tr>';
-	print '<tr><td>Продавец</td><td>-----------------</td><td>/_____________/</td></tr>';
+	print '<tr><td><b>Покупатель</b></td><td>-----------------</td><td>/_____________/</td></tr>';
+	print '<tr><td colspan=3>Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.<br /><br /></td></tr>';
+	print '<tr><td><b>Продавец</b></td><td>-----------------</td><td>/_____________/</td></tr>';
 	print '</table></div>';
 	print "<p class=noprint><a href=\"mailer.pl?cartid=$cartid&storename=$storename\">Send email notify</a><br /><br /><a href=\"?cmd=ChangeOrderStatus&orderstatus=2&cartid=$cartid\">In Trash</a>";
 };
