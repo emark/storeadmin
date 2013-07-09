@@ -87,8 +87,10 @@ my $result = $dbi->select(
 my $items = '';
 my $total = 0;
 my $discount_base = 0;
+my $n = 0;
 while(my $row = $result->fetch_hash){
-	$items = $items."$row->{title} (арт. $row->{productid}) - $row->{price} руб.\t$row->{count} шт.\t\n";
+	$n++;
+	$items = $items."$n. $row->{title} (арт. $row->{productid}) - $row->{price} руб.\t$row->{count} шт.\t\n";
 	$discount_base = $discount_base + $row->{price}*$row->{count} if !$row->{discount};
 	$total = $total+($row->{count}*$row->{price});
 };
@@ -140,6 +142,8 @@ $mb_txt = <<EOF;
 Благодарим за обращение в наш магазин.
 
 Номер заказа: $result->{id}
+Код активации: $result->{rvcode}
+
 $items---
 Итого (без доставки): $total
 $comments
