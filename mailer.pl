@@ -164,9 +164,9 @@ http://www.$storename.ru/about/delivery-and-payment.html
 http://www.$storename.ru/
 EOF
 
-print $subject;
-print $mb_txt;
-exit;
+#print $subject;
+#print $mb_txt;
+#exit;
 
 print "\nCartID: $cartid\nStatus: ";
 if($rcpt){
