@@ -88,7 +88,7 @@ my $items = '';
 my $total = 0;
 my $discount_base = 0;
 while(my $row = $result->fetch_hash){
-	$items = $items."$row->{title} - $row->{price} руб.\t$row->{count} шт.\t\n";
+	$items = $items."$row->{title} (арт. $row->{productid}) - $row->{price} руб.\t$row->{count} шт.\t\n";
 	$discount_base = $discount_base + $row->{price}*$row->{count} if !$row->{discount};
 	$total = $total+($row->{count}*$row->{price});
 };
@@ -113,9 +113,17 @@ if($result->{discount}){
 		where => {name => $result->{discount}},
 	)->value;
 	if($discount_rate){
-		my $discount_sum = sprintf("%d",$discount_base*$discount_rate/100);
-		$discount_sum = $total-$discount_sum;
-		$total = "$discount_sum руб., в том числе скидка: $discount_rate%\n"
+		my $discount_sum = 0;
+        if ($discount_rate < 1){
+            $discount_sum = sprintf("%d",$discount_base*$discount_rate);
+            $discount_rate = $discount_rate*100;
+            $discount_rate = $discount_rate.'%';
+        }else{
+            $discount_sum = $discount_rate;
+            $discount_rate = $discount_rate.' руб.';
+        };
+        $total = $total-$discount_sum;
+        $total = "$total руб. в том числе скидка $discount_rate",
 	};
 }else{
 	$total = $total.' руб.';
@@ -143,6 +151,9 @@ http://www.$storename.ru/cart/payment/$result->{cartid}/
 
 Все варианты оплаты и доставки заказа:
 http://www.$storename.ru/about/delivery-and-payment.html
+
+Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.
+Условия предоставления скидок размещены на странице http://www.nastartshop.ru/about/discounts.html
 -- 
 Интернет-магазин "$cyr_storename{$storename}"
 Мы работаем:
@@ -153,9 +164,9 @@ http://www.$storename.ru/about/delivery-and-payment.html
 http://www.$storename.ru/
 EOF
 
-#print $subject;
-#print $mb_txt;
-#exit;
+print $subject;
+print $mb_txt;
+exit;
 
 print "\nCartID: $cartid\nStatus: ";
 if($rcpt){
