@@ -29,16 +29,69 @@ print header(-charset => 'utf-8',
 		-type => 'text/html',
 		);
 
+return exit if !$cartid;
+
 for ($template){
 	if(/TradeCheck/){
-		return exit if !$cartid;
-		&TradeCheck($cartid);
-	}elsif(/OrderView/){
-		return exit if !$cartid;
-		&OrderView($cartid);
+		&TradeCheck;
+	}elsif(/OrderView/){;
+		&OrderView;
+	}elsif(/Review/){
+		&Review;
 	}else{
 		print p("Print form {$template} not found");	
 	};
+};
+
+
+sub Review(){
+print <<CSS;
+<style>
+div, table{
+    font-family: Arial, serif;
+    font-size: 14px;
+}
+table{
+    width:100%;
+}
+</style>
+CSS
+
+	my $result = $dbi->select(
+		table => 'orders',
+		columns => ['id','rvcode'],
+		where => {cartid => $cartid},
+	)->one;
+	my @orderdate = localtime($cartid);
+	$orderdate[5] = $orderdate[5]+1900;
+	$orderdate[4] = $orderdate[4]+1;
+	$orderdate[4] = '0'.$orderdate[4] if $orderdate[4] < 10;
+	$orderdate[3] = '0'.$orderdate[3] if $orderdate[3] < 10;
+	
+	print '<div id="content">';	
+	print h2('<center>КУПОН НА 300 БАЛЛОВ*</center>');
+	print p('<p align=right>*1 балл = 1 рубль');
+	print p('<b>Поздравляем!</b> Вы стали обладателем скидочного купона от интернет-магазина НаСтарт.РФ
+Чтобы получить скидку, купон необходимо активировать.');
+	print h3('<center><i>Как активировать купон</i></center>');
+print<<HTML;
+<ol>
+<li>Зайдите в интернет-магазин НаСтарт.РФ в раздел “Отзывы”. Нажмите кнопку “Добавить отзыв”</li>
+<li>Напишите свой отзыв о покупке и оцените работу магазина. Укажите номер заказа <b>$result->{id}</b> и код активации купона <b>$result->{rvcode}</b></li>
+</ol>
+HTML
+	print h3('<center><i>Правила применения купона</i></center>');
+print <<HTML;
+<ul>
+<li>При следующем заказе укажите промо-код <b>$result->{id}$result->{rvcode}</b> в специальном поле на странице оформления интернет-магазина.</li>
+<li>Промо-код можно использовать только один раз.</li>
+<li>Активированный купон можно подарить друзьям.</li>
+<li>Если вы потеряли купон, обратитесь в службу поддержки интернет-магазина по электронной почте: <b>hello\@nastartshop.ru</b> или по телефону: <b>8 (391) 203-03-10</b></li>
+<li>Период использования активированного купона ограничен сроком проведения текущей акции.</li>
+</ul>
+Полный список правил размещен на сайте http://www.nastartshop.ru/about/reviews.html
+HTML
+	print '<div>';
 };
 
 sub OrderView(){
@@ -61,6 +114,7 @@ CSS
 	my %delivery = (courier => 'Курьером', store => 'Самовывоз', shipping => 'Транспортные компании');
 	my %payment = (cash => 'Наличные', check => 'Банк', yamoney => 'Яндекс', credit => 'Оплата в кредит');
 	
+	print "<body OnLoad=\"javascript:showAddress('$order->{address}')\">";
 	print '<div id="content">';
 	print p('ООО "Электронный маркетинг" ИНН 2463213306 ОГРН 1092468020743 Юр. адрес: г .Красноярск, ул. Телевизорная, дом 1 строение 9, помещение 31 Телефон: 8 (391) 203-03-10');
 	print "<h2 align=center>Накладная № $order->{id}</h2>";
@@ -86,10 +140,15 @@ CSS
     print '</table>';
 	print '</div><br/>';
 	print '<table>';
-	print '<tr><td><b>Покупатель</b></td><td>-----------------</td><td>/_____________/</td></tr>';
+	print '<tr><td><b>Получил</b></td><td>-----------------</td><td>/_____________/</td></tr>';
 	print '<tr><td colspan=3>Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.<br /><br /></td></tr>';
-	print '<tr><td><b>Продавец</b></td><td>-----------------</td><td>/_____________/</td></tr>';
-	print '</table></div>';
+	print '<tr><td><b>Передал</b></td><td>-----------------</td><td>/_____________/</td></tr>';
+	print '</table></div><br/>';
+	print p('Служебные пометки');
+	print hr.br;
+	print hr.br;
+	print hr.br;
+	print hr.br;
 };
 
 sub TradeCheck(){
@@ -134,9 +193,10 @@ CSS
     );
 
     print '<table border=1 cellpadding=5 cellspacing=0>';
-	print '<tr><th>№</th><th>Наименование</th><th>Арт.</th><th>Кол-во</th><th>Цена, руб.</th><th>Сумма, руб.</th><th>Дисконт, %</th></tr>';
+	print '<tr><th>№</th><th>Наименование</th><th>Арт.</th><th>Кол-во</th><th>Цена, руб.</th><th>Дисконт, %</th><th>Сумма, руб.</th></tr>';
 	my $n = 1;
 	my $total = 0;
+	my $base_sum = 0;
 	my $discount_base = 0;
     while(my $row = $result->fetch_hash){
         print '<tr>';
@@ -145,13 +205,14 @@ CSS
 		print sprintf ("<td align=center>%06d</td>",$row->{productid});
 		print "<td align=right>$row->{count}</td>";
 		print "<td align=right>$row->{price}-00</td>";
-		print sprintf "<td align=right>%d-00</td>",$row->{count}*$row->{price};
 		print "<td align=right>$row->{discount}</td>";
+		print sprintf "<td align=right>%d-00</td>",$row->{count}*$row->{price};
         print '</tr>';
 		$n++;
 		$total = $total + $row->{count}*$row->{price};
 		$discount_base = $discount_base + $row->{price}*$row->{count} if !$row->{discount};
     };
+	print "<tr><td colspan=6><b>Итого</b></td><td align=right><b>$total-00</b></td></tr>";
     print '</table>';
 	print '<p><center><b>Наличие кассового чека обязательно</b></center></p>';
 	
@@ -175,8 +236,7 @@ CSS
 	}else{
 		$total = $total.' руб. 00 коп.';
 	};
-	
-	print "<h3>Итого: $total </h3>";
+	print h3("Сумма к оплате: $total ");
 	print p("Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b><br />Условия предоставления скидок размещены на странице http://www.nastartshop.ru/about/discounts.html");
 	print '<table>';
 	print '<tr><td><b>Покупатель</b></td><td>-----------------</td><td>/_____________/</td></tr>';
