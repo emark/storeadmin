@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+use utf8;
 use strict;
 use warnings;
 use CGI qw/:standard/;
@@ -38,11 +39,101 @@ for ($template){
 		&OrderView;
 	}elsif(/Review/){
 		&Review;
+	}elsif(/CreditOrder/){
+		&CreditOrder;
 	}else{
 		print p("Print form {$template} not found");	
 	};
 };
 
+sub CreditOrder(){
+	my $result = $dbi->select(
+		table => 'orders',
+		columns => ['id','rvcode'],
+		where => {cartid => $cartid},
+	);
+	my $order = $result->one;
+	my @orderdate = localtime($cartid);
+	my $items = $dbi->select(
+		table => 'items',
+		where => {cartid => $cartid},
+	);
+
+	my %category = ();
+	$result = $dbi->select(
+		table => 'catalog',
+    		column => ['catalog.caption as caption','products.id as productid'],
+    		join => [
+			{
+			clause => 'inner join products on catalog.url = products.caturl',
+			table => ['catalog', 'products'],
+			}
+    		]
+	);
+	while (my $row = $result->fetch_hash){
+		$category{$row->{productid}} = $row->{caption};
+	};
+
+	my $totalsum = 0;
+	my $firstpayment = 0;
+	my %items = ();
+
+	while (my $row = $items->fetch_hash){
+		my $pcsprice = $row->{count}*$row->{price};
+		$pcsprice = sprintf("%d",$pcsprice - $row->{count}*($row->{price}*($row->{discount}/100))) if $row->{discount};
+		$totalsum = $totalsum + $pcsprice;
+
+		my $price = $row->{price};
+		$price = sprintf("%d",$row->{price}-$row->{price}*($row->{discount}/100)) if $row->{discount};
+
+		$items{$row->{productid}} = "Наименование: $row->{title}\nКатегория товара: $category{$row->{productid}}\nКоличество: $row->{count}\nЦена за единицу: $price.00\n";
+	};
+	$firstpayment = sprintf("%d",$totalsum/10);
+	
+	print '<pre>';
+print<<HTML;
+Тема: Интернет-заказ www.nastartshop.ru № $order->{id}. ТТ: 278594. POSORDER3
+
+[Параметры заявки]
+Код ТТ: 278594
+Адрес сайта: www.nastartshop.ru
+Название ТО: ООО "Электронный маркетинг"
+Номер заказа: $order->{id}
+Кредитный продукт: 10-10-10
+Срок кредита: 10
+Первоначальный взнос: $firstpayment
+Способ получения: Самовывоз
+Комментарий клиента:
+Сумма заказа: $totalsum.00
+
+[Персональные данные клиента]
+Фамилия: $order->{person}
+Имя: 
+Отчество: 
+Дата рождения: 
+Серия и номер паспорта: 
+Электронная почта:
+Контактный телефон: $order->{tel}
+HTML
+
+my $n = 0;
+foreach my $key (keys %items){
+	$n++;
+	print "\n[Товар$n]\n";
+	print $items{$key};
+};
+
+print<<HTML;
+
+[Служебные данные]
+ФИО сотрудника ТО: Свириденко М. А.
+Телефон для информирования ТО: +7 (908) 208-7328
+E-mail для информирования ТО: mailbox\@emrk.ru
+Код агента ТО:
+Кодировка: WIN-1251
+HTML
+	print '</pre>';
+};
 
 sub Review(){
 print <<CSS;
