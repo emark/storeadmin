@@ -208,7 +208,7 @@ CSS
 	print "<body OnLoad=\"javascript:showAddress('$order->{address}')\">";
 	print '<div id="content">';
 	print p('ООО "Электронный маркетинг" ИНН 2463213306 ОГРН 1092468020743 Юр. адрес: г .Красноярск, ул. Телевизорная, дом 1 строение 9, помещение 31 Телефон: 8 (391) 203-03-10');
-	print "<h2 align=center>Накладная № $order->{id}</h2>";
+	print "<h3 align=left>Накладная № $order->{id}</h3>";
 	print p("Заказчик: $order->{person}, $order->{tel}<br />Адрес: $order->{address}<br/>Доставка: $delivery{$order->{delivery}} Оплата: $payment{$order->{payment}}<br/>Комментарий: $order->{comments}");
 
 	my $result = $dbi->select(
@@ -229,17 +229,17 @@ CSS
 		$n++;
     };
     print '</table>';
-	print '</div><br/>';
+	print '<br/>';
 	print '<table>';
 	print '<tr><td><b>Получил</b></td><td>-----------------</td><td>/_____________/</td></tr>';
 	print '<tr><td colspan=3>Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.<br /><br /></td></tr>';
 	print '<tr><td><b>Передал</b></td><td>-----------------</td><td>/_____________/</td></tr>';
-	print '</table></div><br/>';
-	print p('Служебные пометки');
-	print hr.br;
-	print hr.br;
-	print hr.br;
-	print hr.br;
+	print '</table><br/>';
+	print br.hr;
+	print h4('Служебная информация');
+	print pre('Cумма заказа:             Доставка:                Установка:<br/><br/>Итого:<br/><br/>Сдача:');
+	print hr;
+	print '</div>';
 };
 
 sub TradeCheck(){
@@ -276,7 +276,13 @@ CSS
 	print '</td></tr></table>';
 	print "<h2 align=center>Товарный чек № $result->{id} от $curdate[3].$curdate[4].$curdate[5]г.</h2>";
 	print '</p>';
-	my $discount = $result->{discount};
+
+	my $discount_rate = 0;
+	$discount_rate = $dbi->select(
+			column => 'discount',
+			table => 'discounts',
+			where => {name => $result->{discount}},
+	)->value if ($result->{discount});
 
 	$result = $dbi->select(
         table => 'items',
@@ -284,7 +290,7 @@ CSS
     );
 
     print '<table border=1 cellpadding=5 cellspacing=0>';
-	print '<tr><th>№</th><th>Наименование</th><th>Арт.</th><th>Кол-во</th><th>Цена, руб.</th><th>Дисконт, %</th><th>Сумма, руб.</th></tr>';
+	print '<tr><th>№</th><th>Наименование</th><th>Арт.</th><th>Кол-во</th><th>Дисконт, %</th><th>Цена, руб.</th><th>Скидка, %</th><th>Сумма, руб.</th></tr>';
 	my $n = 1;
 	my $total = 0;
 	my $base_sum = 0;
@@ -295,24 +301,20 @@ CSS
 		print "<td>$row->{title}</td>";
 		print sprintf ("<td align=center>%06d</td>",$row->{productid});
 		print "<td align=right>$row->{count}</td>";
-		print "<td align=right>$row->{price}-00</td>";
 		print "<td align=right>$row->{discount}</td>";
+		print "<td align=right>$row->{price}-00</td>";
+		print '<td align=right>',$row->{discount} || $discount_rate > 1 ? 0 : $discount_rate*100,'</td>';
 		print sprintf "<td align=right>%d-00</td>",$row->{count}*$row->{price};
         print '</tr>';
 		$n++;
 		$total = $total + $row->{count}*$row->{price};
 		$discount_base = $discount_base + $row->{price}*$row->{count} if !$row->{discount};
     };
-	print "<tr><td colspan=6><b>Итого</b></td><td align=right><b>$total-00</b></td></tr>";
+	print "<tr><td colspan=7><b>Итого</b></td><td align=right><b>$total-00</b></td></tr>";
     print '</table>';
 	print '<p><center><b>Наличие кассового чека обязательно</b></center></p>';
 	
-	if($discount){
-		my $discount_rate = $dbi->select(
-			column => 'discount',
-			table => 'discounts',
-			where => {name => $discount},
-		)->value;
+	if($discount_rate){
 		my $discount_sum = 0;
 		if ($discount_rate < 1){
 			$discount_sum = sprintf("%d",$discount_base*$discount_rate);
