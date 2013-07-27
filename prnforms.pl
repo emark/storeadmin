@@ -269,12 +269,12 @@ CSS
 
 	print '<div id="content">';
 	print '<table border=0><tr><td>';
-	print 'ООО "Электронный маркетинг"<br />ИНН 2463213306 ОГРН 1092468020743<br />Юр. адрес: г .Красноярск, ул. Телевизорная,<br />дом 1 строение 9, помещение 31<br />Телефон: 8 (391) 203-03-10';
+	print 'ООО "Электронный маркетинг"<br />ИНН 2463213306<br /> ОГРН 1092468020743<br />Юр. адрес: г. Красноярск, ул. Телевизорная,<br /> дом 1 строение 9, помещение 31';
 	print '</td><td align=right>';
 	print "Интернет-магазин <b>НаСтарт.РФ</b><br/>http://www.nastartshop.ru<br />";
-	print "8 (391) 203-03-10, 292-02-29<br />Пн-Пт с 11:00 - 19:00<br />Сб. с 12:00 - 18:00";
+	print "8 (391) 203-03-10, 292-02-29<br />Пн-Пт 11:00 - 19:00<br />Сб. 12:00 - 18:00";
 	print '</td></tr></table>';
-	print "<h2 align=center>Товарный чек № $result->{id} от $curdate[3].$curdate[4].$curdate[5]г.</h2>";
+	print "<h2 align=center>Товарный чек № $result->{id} от $curdate[3].$curdate[4].$curdate[5] г.</h2>";
 	print '</p>';
 
 	my $discount_rate = 0;
@@ -310,26 +310,28 @@ CSS
 		$total = $total + $row->{count}*$row->{price};
 		$discount_base = $discount_base + $row->{price}*$row->{count} if !$row->{discount};
     };
-	print "<tr><td colspan=7><b>Итого</b></td><td align=right><b>$total-00</b></td></tr>";
-    print '</table>';
-	print '<p><center><b>Наличие кассового чека обязательно</b></center></p>';
+	print "<tr><td colspan=7 align=right><b>Итого без скидки:</b></td><td align=right><b>$total-00</b></td></tr>";
 	
 	if($discount_rate){
 		my $discount_sum = 0;
 		if ($discount_rate < 1){
 			$discount_sum = sprintf("%d",$discount_base*$discount_rate);
-			$discount_rate = $discount_rate*100;
-			$discount_rate = $discount_rate.'%';
+			#$discount_rate = $discount_rate*100;
+			#$discount_rate = $discount_rate.'%';
 		}else{
 			$discount_sum = $discount_rate;
-			$discount_rate = $discount_rate.' руб.';
+			#$discount_rate = $discount_rate.' руб.';
 		};
 		$total = $total-$discount_sum;
-		$total = "$total руб. в том числе скидка $discount_rate",
+		print "<tr><td colspan=7 align=right><b>Сумма скидки:</b></td><td align=right><b>$discount_sum-00</b></td></tr>";
+		#$total = "$total руб. в том числе скидка $discount_rate",
 	}else{
-		$total = $total.' руб. 00 коп.';
+		#$total = $total.' руб. 00 коп.';
 	};
-	print h3("Сумма к оплате: $total ");
+
+    print '</table>';
+	print h3("Сумма к оплате: $total руб. 00 коп.");
+	print '<p><center><b>Наличие кассового чека обязательно!</b></center></p>';
 	print p("Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b><br />Условия предоставления скидок размещены на странице http://www.nastartshop.ru/about/discounts.html");
 	print '<table>';
 	print '<tr><td><b>Покупатель</b></td><td>-----------------</td><td>/_____________/</td></tr>';
