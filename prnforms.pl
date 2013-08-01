@@ -205,7 +205,6 @@ CSS
 	my %delivery = (courier => 'Курьером', store => 'Самовывоз', shipping => 'Транспортные компании');
 	my %payment = (cash => 'Наличные', check => 'Банк', yamoney => 'Яндекс', credit => 'Оплата в кредит');
 	
-	print "<body OnLoad=\"javascript:showAddress('$order->{address}')\">";
 	print '<div id="content">';
 	print p('ООО "Электронный маркетинг" ИНН 2463213306 ОГРН 1092468020743 Юр. адрес: г .Красноярск, ул. Телевизорная, дом 1 строение 9, помещение 31 Телефон: 8 (391) 203-03-10');
 	print "<h3 align=left>Накладная № $order->{id}</h3>";
@@ -234,11 +233,13 @@ CSS
 	print '<tr><td><b>Получил</b></td><td>-----------------</td><td>/_____________/</td></tr>';
 	print '<tr><td colspan=3>Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.<br /><br /></td></tr>';
 	print '<tr><td><b>Передал</b></td><td>-----------------</td><td>/_____________/</td></tr>';
-	print '</table><br/>';
-	print br.hr;
-	print h4('Служебная информация');
-	print pre('Cумма заказа:             Доставка:                Установка:<br/><br/>Итого:<br/><br/>Сдача:');
-	print hr;
+	print '</table>';
+	print "<script>
+function HideInfo(){
+	document.getElementById(\"info\").style.display=\"none\";
+}
+	</script>";
+	print '<pre id="info"><hr><a href="#" onClick="javascript:HideInfo()">Служебная информация</a><br/><br/>Cумма заказа:             Доставка:                Установка:<br/><br/>Итого:<br/><br/>Сдача:           с суммы:<br/><br/><hr/></pre>';
 	print '</div>';
 };
 
