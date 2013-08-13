@@ -314,7 +314,7 @@ CSS
 		$item_discount_sum = $item_discount_sum + $row->{price}*$row->{discount}/100 if $row->{discount};
     };
 	print "<tr><td colspan=7 align=right><b>Итого без скидки:</b></td><td align=right><b>$total-00</b></td></tr>";
-	print sprintf "<tr><td colspan=7 align=right><b>В т. ч. дисконт*:</b></td><td align=right><b>%d-00</b></td></tr>",$item_discount_sum;
+	print sprintf "<tr><td colspan=7 align=right><b>В т. ч. дисконт*:</b></td><td align=right><b>%d-00</b></td></tr>",$item_discount_sum if $item_discount_sum;
 	
 	if($discount_rate){
 		my $discount_sum = 0;
@@ -336,8 +336,9 @@ CSS
     print '</table>';
 	print h3("Сумма к оплате: $total руб. 00 коп.");
 	#print '<p><center><b>Наличие кассового чека обязательно!</b></center></p>';
-	print p("Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b><br />Скидка не распространяется на товары с дисконтом. Условия предоставления скидок размещены на странице http://www.nastartshop.ru/about/discounts.html<br/>* - сумма дисконта в рублях рассчитана в качестве справочной информации и может незначительно отличаться от суммы фактически предоставленного дисконта.");
-	print '<table>';
+	print "<p>Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b><br />Скидка не распространяется на товары с дисконтом. Условия предоставления скидок размещены на странице <b>http://www.nastartshop.ru/about/discounts.html</b>";
+	print "<br/>* - сумма дисконта в рублях рассчитана в качестве справочной информации и может незначительно отличаться от суммы фактически предоставленного дисконта." if $item_discount_sum;
+	print '</p><table>';
 	print '<tr><td><b>Покупатель</b></td><td>-----------------</td><td>/_____________/</td></tr>';
 	print '<tr><td colspan=3>Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.<br /><br /></td></tr>';
 	print '<tr><td><b>Продавец</b></td><td>-----------------</td><td>/_____________/</td></tr>';
