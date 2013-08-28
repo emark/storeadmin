@@ -41,9 +41,48 @@ for ($template){
 		&Review;
 	}elsif(/CreditOrder/){
 		&CreditOrder;
+	}elsif(/RecipientInformation/){
+		&RecipientInformation;
 	}else{
 		print p("Print form {$template} not found");	
 	};
+};
+
+sub RecipientInformation(){
+	my $result = $dbi->select(
+        table => 'orders',
+        columns => ['person','address','tel','id'],
+        where => {cartid => $cartid},
+    );
+    my $order = $result->one;
+
+print <<CSS;
+<style>
+div, table, input{
+    font-family: Arial, serif;
+    font-size: 22px;
+}
+table{
+    width:100%;
+}
+</style>
+CSS
+
+print<<HTML;
+<div id="Content">
+Отправитель: ООО "Эмарк", <br/>ОГРН 1092468020743, ИНН 2463213306<br/>
+660028, Красноярск, Красноярский край, Россия,<br/>
+Телевизорная ул., д. 1, корп. 9<br/>
+Почтовый адрес: 660028, г. Красноярск, а/я 11939<br/>
+Телефон: 8 (391) 203-03-10, 292-02-29<br/>
+Почта: mailbox\@emrk.ru<br/>
+<hr/>
+Получатель: $order->{person}, $order->{tel}<br/>
+Адрес: $order->{address}<br/>
+Данные заказа: $order->{id}-$cartid<br/>
+Место <input type=text size=2> из <input type=text size=2>
+</div>
+HTML
 };
 
 sub CreditOrder(){
