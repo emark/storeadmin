@@ -277,7 +277,7 @@ CSS
 <br/>
 <hr>
 <table border=0>
-<tr valign=top><td>Заказ:<br/><br/>Доставка:<br/><br/>Установка:<br/><br/>Итого:</td><td>Сдача:<br/><br/>с суммы:</td><td align=right><img src=\"http://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=http://www.emrk.ru/cgi-bin/storeadmin/mobile.pl?cid=$cartid\"><br/>$cartid</td></tr>
+<tr valign=top><td>Заказ:<br/><br/>Доставка:<br/><br/>Установка:<br/><br/>Итого:</td><td>Сдача:<br/><br/>с суммы:</td><td align=center>m.emrk.ru<br/><img src=\"http://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=http://m.emrk.ru/?cid=$cartid\"><br/>$cartid</td></tr>
 </table>
 SERVICEINFO
 	};
