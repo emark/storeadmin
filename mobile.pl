@@ -31,4 +31,4 @@ my $order = $dbi->select(
 	where => {cartid => $cartid}
 )->fetch_all || undef;
 
-print "<p>Заказ: $order->[0][0]</p><p>$order->[0][1]</p><p><form action=\"http://maps.yandex.ru/?text=$order->[0][2]\" method=\"get\"><input type=\"submit\" value=\"Адрес на карте\"></form></p>";
+print "<p>Заказ: $order->[0][0]</p><p>$order->[0][1]</p><p><form action=\"http://maps.yandex.ru/\" method=\"get\"><input type=hidden name=text value=\"$order->[0][2]\"\"><input type=\"submit\" value=\"Адрес на карте\"></form></p>";
