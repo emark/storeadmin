@@ -23,7 +23,7 @@ $dbi->do('SET NAMES utf8');
 my $query = new CGI;
 my $cartid = $query->param('cid') || 0;
 
-print $query->header;
+print $query->header(-charset=>'utf-8');
 print $query->start_html(-title=>'Emark Courier');
 
 my $order = $dbi->select(
