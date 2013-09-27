@@ -23,7 +23,8 @@ $dbi->do('SET NAMES utf8');
 my $query = new CGI;
 my $cartid = $query->param('cid') || 0;
 
-print "Content-type: text/html\n\n";
+print $query->header;
+print $query->start_html(-title=>'Emark Courier');
 
 my $order = $dbi->select(
 	table => 'orders',
@@ -36,3 +37,5 @@ if($order->[0][0]){
 }else{
 	print '<form action="http://m.emrk.ru/" method="get"><p>Идентификатор заказа</p><input type=text size=10 name=cid><input type=submit></form>';
 };
+
+print $query->end_html();
