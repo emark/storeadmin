@@ -271,12 +271,13 @@ CSS
 	print '<tr><td colspan=3>Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.<br /><br /></td></tr>';
 	print '<tr><td><b>Передал</b></td><td>-----------------</td><td>/_____________/</td></tr>';
 	print '</table>';
-	print "<script>
-function HideInfo(){
-	document.getElementById(\"info\").style.display=\"none\";
-}
-	</script>";
-	print '<pre id="info"><hr><a href="#" onClick="javascript:HideInfo()">Служебная информация</a><br/><br/>Cумма заказа:             Доставка:                Установка:<br/><br/>Итого:<br/><br/>Сдача:           с суммы:<br/><br/><hr/></pre>';
+	print<<SERVICEINFO;
+<br/>
+<hr>
+<table border=0>
+<tr valign=top><td>Заказ:<br/><br/>Доставка:<br/><br/>Установка:<br/><br/>Итого:</td><td>Сдача:<br/><br/>с суммы:</td><td align=right><img src=\"http://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=http://www.emrk.ru/cgi-bin/storeadmin/mobile.pl?cid=$cartid\"></td></tr>
+</table>
+SERVICEINFO
 	print '</div>';
 };
 
