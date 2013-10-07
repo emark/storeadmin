@@ -29,6 +29,7 @@ my $cartid = param('cartid') || 0;
 print header(-charset => 'utf-8',
 		-type => 'text/html',
 		);
+print start_html(-title=>'Печатная форма');
 
 return exit if !$cartid;
 
@@ -49,6 +50,8 @@ for ($template){
 		print p("Print form {$template} not found");	
 	};
 };
+
+print end_html;
 
 sub RecipientInformation(){
 	my $result = $dbi->select(
