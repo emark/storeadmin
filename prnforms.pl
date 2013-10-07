@@ -43,6 +43,8 @@ for ($template){
 		&CreditOrder;
 	}elsif(/RecipientInformation/){
 		&RecipientInformation;
+	}elsif(/TradeOrder/){
+		&TradeOrder;
 	}else{
 		print p("Print form {$template} not found");	
 	};
@@ -383,5 +385,86 @@ CSS
 	print '<tr><td><b>Покупатель</b></td><td>-----------------</td><td>/_____________/</td></tr>';
 	print '<tr><td colspan=3>Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.<br /><br /></td></tr>';
 	print '<tr><td><b>Продавец</b></td><td>-----------------</td><td>/_____________/</td></tr>';
+	print '</table></div>';
+};
+
+sub TradeOrder(){
+	my @curdate = localtime(time);
+	$curdate[5] = $curdate[5] + 1900;
+	$curdate[4] = $curdate[4] + 1;
+	$curdate[4] = '0'.$curdate[4] if $curdate[4] < 10;
+	$curdate[3] = '0'.$curdate[3] if $curdate[3] < 10;
+
+	my $result = $dbi->select(
+		table => 'orders',
+		where => {cartid => $cartid}
+	);
+	$result = $result->fetch_hash;
+
+	print '<div id="content">';
+	print p({-align=>'right'},'Приложение №1 <br/>к договору поставки № _____ - _____ <br/>от "____" _______________ 20____ г.');
+	print p({-align=>"center"},'Заказ на поставку товаров');
+	my $discount_rate = 0;
+	$discount_rate = $dbi->select(
+			column => 'discount',
+			table => 'discounts',
+			where => {name => $result->{discount}},
+	)->value if ($result->{discount});
+
+	$result = $dbi->select(
+        table => 'items',
+		where => {cartid => $cartid},
+    );
+
+    print '<table border=1 cellpadding=5 cellspacing=0>';
+	print '<tr><th>№</th><th>Наименование</th><th>Арт.</th><th>Кол-во</th><th>Дисконт, %</th><th>Цена, руб.</th><th>Скидка, %</th><th>Сумма, руб.</th></tr>';
+	my $n = 1;
+	my $total = 0;
+	my $base_sum = 0;
+	my $discount_base = 0;
+	my $item_discount_sum = 0;
+    while(my $row = $result->fetch_hash){
+        print '<tr>';
+		print "<td align=center>$n</td>";
+		print "<td>$row->{title}</td>";
+		print sprintf ("<td align=center>%06d</td>",$row->{productid});
+		print "<td align=right>$row->{count}</td>";
+		print "<td align=right>$row->{discount}</td>";
+		print "<td align=right>$row->{price}-00</td>";
+		print '<td align=right>',$row->{discount} || $discount_rate > 1 ? 0 : $discount_rate*100,'</td>';
+		print sprintf "<td align=right>%d-00</td>",$row->{count}*$row->{price};
+        print '</tr>';
+		$n++;
+		$total = $total + $row->{count}*$row->{price};
+		$discount_base = $discount_base + $row->{price}*$row->{count} if !$row->{discount};
+		$item_discount_sum = $item_discount_sum + $row->{price}*$row->{discount}/100 if $row->{discount};
+    };
+	print "<tr><td colspan=7 align=right><b>Итого без скидки:</b></td><td align=right><b>$total-00</b></td></tr>";
+	#print sprintf "<tr><td colspan=7 align=right><b>В т. ч. дисконт*:</b></td><td align=right><b>%d-00</b></td></tr>",$item_discount_sum if $item_discount_sum;
+	
+	if($discount_rate){
+		my $discount_sum = 0;
+		if ($discount_rate < 1){
+			$discount_sum = sprintf("%d",$discount_base*$discount_rate);
+			#$discount_rate = $discount_rate*100;
+			#$discount_rate = $discount_rate.'%';
+		}else{
+			$discount_sum = $discount_rate;
+			#$discount_rate = $discount_rate.' руб.';
+		};
+		$total = $total-$discount_sum;
+		print "<tr><td colspan=7 align=right><b>Сумма скидки:</b></td><td align=right><b>$discount_sum-00</b></td></tr>";
+		#$total = "$total руб. в том числе скидка $discount_rate",
+	}else{
+		#$total = $total.' руб. 00 коп.';
+	};
+
+    print '</table>';
+	print p("Общая сумма заказа $total (_____________________________________________________<br/><br/>____________________________________________________________) руб. 00 коп.");
+	print p('Дата поставки товара не позднее "____" _______________ 20____ г.');
+
+	print "<p>Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b><br />Скидка не распространяется на товары с дисконтом. Условия предоставления скидок размещены на интернет-странице по адресу http://www.nastartshop.ru/about/discounts.html";
+	print '</p><table width=100%>';
+	print '<tr><td>Поставщик:<br/><br/>_____________ /__________________</td><td>Покупатель:<br/><br/>_____________ /__________________</td></tr>';
 	print '</table></div>';
 };
