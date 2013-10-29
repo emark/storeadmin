@@ -2,6 +2,7 @@
 
 use utf8;
 use strict;
+use lib "/home/hosting_locumtest/usr/local/lib/perl5";
 use warnings;
 use CGI qw/:standard/;
 use DBIx::Custom;
