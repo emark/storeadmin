@@ -53,14 +53,14 @@ my %token = (
 	papatut => 'a7a691ab-e39b-4245-affa-951275c3fbbf',
 );
 
-my $tx = $ua->post_json('http://api.postmarkapp.com/email'=> {
+my $tx = $ua->post('http://api.postmarkapp.com/email' => {'X-Postmark-Server-Token' => $token{$storename}} => json => {
 	From => "hello\@$storename.ru",
 	To => $rcpt,
 	Subject => $subject,
 	HtmlBody => '',
 	TextBody => $mb_txt,
 	ReplyTo => "hello\@$storename.ru",
-} => {'X-Postmark-Server-Token' => $token{$storename}});
+	});
 print $tx->res->body;
 };
 
