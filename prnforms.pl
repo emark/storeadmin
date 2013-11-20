@@ -233,8 +233,9 @@ print <<CSS;
 <style>
 div, table{
     font-family: Arial, serif;
-    font-size: 14px;
+    font-size: 12px;
 }
+.small{font-size:10px}
 table{
     width:100%;
 }
@@ -249,7 +250,7 @@ CSS
 	my %payment = (cash => 'Наличные', check => 'Банк', yamoney => 'Яндекс', credit => 'Оплата в кредит');
 	
 	print '<div id="content">';
-	print p('ООО "Электронный маркетинг" ИНН 2463213306 ОГРН 1092468020743 Юр. адрес: г .Красноярск, ул. Телевизорная, дом 1 строение 9, помещение 31 Телефон: 8 (391) 203-03-10');
+	print p({-class => 'small'},'ООО "Электронный маркетинг" ОГРН 1092468020743, т. 8(391)203-03-10');
 	print "<h3 align=left>Накладная № $order->{id}</h3>";
 	print p("Заказчик: $order->{person}, $order->{tel}<br />Адрес: $order->{address}<br/>Доставка: $delivery{$order->{delivery}} Оплата: $payment{$order->{payment}}<br/>Комментарий: $order->{comments}");
 
@@ -273,10 +274,9 @@ CSS
     print '</table>';
 	print '<br/>';
 	print '<table border=0>';
-	print '<tr><td><b>Получил</b></td><td>_________________</td><td>/_____________/</td></tr>';
+	print '<tr><td><b>Получил</b></td><td>_____________</td><td>/_____________/</td></tr>';
 	print '<tr><td colspan=3>Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.<br /><br /></td></tr>';
-	print '<tr><td><b>Передал</b></td><td>_________________</td><td>/_____________/</td></tr>';
-	print '<tr><td></td><td></td><td><br/>Дата/Время: ___________ /_______ </td></tr>';
+	print '<tr><td><b>Передал</b></td><td>_____________</td><td>/_____________/ Дата/Время: ______ /_____ </td></tr>';
 	print '</table>';
 	if($order->{delivery} eq 'courier'){
 		print<<SERVICEINFO;
@@ -316,12 +316,7 @@ CSS
 	$result = $result->fetch_hash;
 
 	print '<div id="content">';
-	print '<table border=0><tr><td>';
-	print 'ООО "Электронный маркетинг"<br />ИНН 2463213306<br /> ОГРН 1092468020743<br />Юр. адрес: г. Красноярск, ул. Телевизорная,<br /> дом 1 строение 9, помещение 31';
-	print '</td><td align=right>';
-	print "Интернет-магазин <b>НаСтарт.РФ</b><br/>http://www.nastartshop.ru<br />";
-	print "8 (391) 203-03-10, 292-02-29<br />Пн-Пт 11:00 - 19:00<br />Сб. 12:00 - 18:00";
-	print '</td></tr></table>';
+	print p('Интернет-магазин <b>НаСтарт.РФ</b> http://www.nastartshop.ru, 8 (391) 203-03-10, 292-02-29<br/>ООО "Электронный маркетинг" ИНН 2463213306, Юр. адрес: г. Красноярск, ул. Телевизорная, 1с9, 31');
 	print "<h2 align=center>Товарный чек № $result->{id} от $curdate[3].$curdate[4].$curdate[5] г.</h2>";
 	print '</p>';
 
@@ -361,7 +356,6 @@ CSS
 		$item_discount_sum = $item_discount_sum + $row->{price}*$row->{discount}/100 if $row->{discount};
     };
 	print "<tr><td colspan=7 align=right><b>Итого без скидки:</b></td><td align=right><b>$total-00</b></td></tr>";
-	print sprintf "<tr><td colspan=7 align=right><b>В т. ч. дисконт*:</b></td><td align=right><b>%d-00</b></td></tr>",$item_discount_sum if $item_discount_sum;
 	
 	if($discount_rate){
 		my $discount_sum = 0;
@@ -382,12 +376,8 @@ CSS
 
     print '</table>';
 	print h3("Сумма к оплате: $total руб. 00 коп.");
-	#print '<p><center><b>Наличие кассового чека обязательно!</b></center></p>';
 	print "<p>Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b><br />Скидка не распространяется на товары с дисконтом. Условия предоставления скидок размещены на странице <b>http://www.nastartshop.ru/about/discounts.html</b>";
-	print "<br/>* - сумма дисконта в рублях рассчитана в качестве справочной информации и может незначительно отличаться от суммы фактически предоставленного дисконта." if $item_discount_sum;
 	print '</p><table>';
-	print '<tr><td><b>Покупатель</b></td><td>-----------------</td><td>/_____________/</td></tr>';
-	print '<tr><td colspan=3>Товар получен и проверен. Претензий к ассортименту, количеству, внешнему виду, комплектации товара не имею.<br /><br /></td></tr>';
 	print '<tr><td><b>Продавец</b></td><td>-----------------</td><td>/_____________/</td></tr>';
 	print '</table></div>';
 };
