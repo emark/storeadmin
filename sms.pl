@@ -51,7 +51,7 @@ sub SendSMS(){
 my $ua = Mojo::UserAgent->new();
 my $tel = $_[0];
 my $sender_name = '+79082120229';
-my $decode_msg = "%D0%9D%D0%B0%D0%A1%D1%82%D0%B0%D1%80%D1%82.%D0%A0%D0%A4:%20%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5.%20%D0%92%D0%B0%D1%88%20%D0%B7%D0%B0%D0%BA%D0%B0%D0%B7%20$orderid%20%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD.%20%D0%9F%D0%BE%D0%B4%D1%80%D0%BE%D0%B1%D0%BD%D0%B5%D0%B5:%2083912030310";
+my $decode_msg = "%D0%9D%D0%B0%D0%A1%D1%82%D0%B0%D1%80%D1%82.%D0%A0%D0%A4:%20%D0%B2%D0%B0%D1%88%20%D0%B7%D0%B0%D0%BA%D0%B0%D0%B7%20$orderid%20%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD.%20%D0%9F%D0%BE%D0%B4%D1%80%D0%BE%D0%B1%D0%BD%D0%B5%D0%B5:%2083912030310";
 
 $ua->get("http://api.sms24x7.ru/?method=push_msg&email=mailbox\@emrk.ru&password=BuqcpZy5&text=$decode_msg&phone=$tel&api_v=1.0&nologin=true&format=json");
 };
