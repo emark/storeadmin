@@ -8,6 +8,7 @@ use CGI qw/:standard/;
 use DBIx::Custom;
 use utf8;
 use v5.10;
+use Encode;
 require 'pkg/Common.pm';
 
 my %cfg = Common::GetConfig();
@@ -35,8 +36,8 @@ $adate[4] = '0'.$adate[4] if($adate[4]<10);
 $adate[3] = '0'.$adate[3] if($adate[3]<10);
 my $cdate = $adate[5].'-'.$adate[4].'-'.$adate[3];
 
-open (YML,"> $catfile") || die "Can't open fil: $catfile";
-print YML<<HEADER;
+open (YML, "> $catfile") || die "Cannot write to file: $catfile";
+my $header =<<HEADER;
 <?xml version="1.0" encoding="windows-1251"?>
 <!DOCTYPE yml_catalog SYSTEM "shops.dtd">
 <yml_catalog date="$cdate 00:01">
@@ -48,6 +49,9 @@ print YML<<HEADER;
 <currency id="RUR" rate="1" plus="0"/>
 </currencies>
 HEADER
+
+$header = encode('cp1251',$header);
+print YML $header;
 print YML "<categories>\n";
 my $category = $dbi->select(
 	table => 'catalog',
@@ -59,7 +63,7 @@ my %categoryid = ();
 my $id = 0;
 while(my $row = $category->fetch_hash){
 	$id++;
-	my $cattitle = $row->{'caption'};
+	my $cattitle = encode('cp1251',$row->{'caption'});
 	print YML<<CATEGORY;
 <category id="$id">$cattitle</category>
 CATEGORY
@@ -91,9 +95,11 @@ while(my $row = $offer->fetch_hash){
 <categoryId type="Own">$categoryid{$row->{'caturl'}}</categoryId>
 OFFER
 	print YML "<picture>http://www.$storename.ru/media/products/thumb/$row->{'url'}.jpg</picture>\n" if $row->{image};
+
+	my $product_title = encode('cp1251',$row->{title});
 	print  YML<<OFFER
 <delivery>true</delivery>
-<name>$row->{'title'}</name>
+<name>$product_title</name>
 </offer>
 OFFER
 };	
