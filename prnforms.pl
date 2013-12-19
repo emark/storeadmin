@@ -254,19 +254,30 @@ CSS
 	print "<h3 align=left>Накладная № $order->{id}</h3>";
 	print p("Заказчик: $order->{person}, $order->{tel}<br />Адрес: $order->{address}<br/>Доставка: $delivery{$order->{delivery}} Оплата: $payment{$order->{payment}}<br/>Комментарий: $order->{comments}");
 
-	my $result = $dbi->select(
+	my $items = $dbi->select(
         table => 'items',
 		where => {cartid => $cartid},
     );
+	
+	my $storage = $dbi->select(
+		table => 'products',
+		columns => ['id','storage'],
+	)->fetch_hash_all;
+
+	my %storage = ();
+	foreach my $key (@{$storage}){
+		$storage{$key->{id}} = $key->{storage};
+	};
 
     print '<table border=1 cellpadding=5 cellspacing=0>';
-	print '<tr><th>№</th><th>Наименование</th><th>Арт.</th><th>Кол-во</th></tr>';
+	print '<tr><th>№</th><th>Наименование</th><th>Арт.</th><th>Склад</th><th>Кол-во</th></tr>';
 	my $n = 1;
-    while(my $row = $result->fetch_hash){
+    while(my $row = $items->fetch_hash){
         print '<tr>';
 		print "<td align=center>$n</td>";
 		print "<td>$row->{title}</td>";
-		print sprintf ("<td align=center>%06d</td>",$row->{productid});
+		print "<td align=center>$row->{productid}</td>";
+		print "<td align=right>$storage{$row->{productid}}</td>";
 		print "<td align=right>$row->{count}</td>";
         print '</tr>';
 		$n++;
