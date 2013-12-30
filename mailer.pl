@@ -19,7 +19,6 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
-my $storename = param('storename') || '';
 my $cartid = param('cartid') || 0;
 my $rcpt = '';
 my $subject = '';
@@ -36,7 +35,7 @@ if($cartid){
 sub CheckAll{
 my $result = $dbi->select(
 	table => 'orders',
-	column => ['cartid','storename'],
+	column => ['cartid'],
 	where => {status => [0, 1], mailer => 0}
 );
 while(my $row = $result->fetch){
@@ -48,18 +47,15 @@ while(my $row = $result->fetch){
 
 sub SendMail(){
 my $ua = Mojo::UserAgent->new();
-my %token = (
-	nastartshop => '8d104571-9db5-49a4-971e-9b1943f6c3b9',
-	papatut => 'a7a691ab-e39b-4245-affa-951275c3fbbf',
-);
+my $token = '8d104571-9db5-49a4-971e-9b1943f6c3b9';
 
-my $tx = $ua->post('http://api.postmarkapp.com/email' => {'X-Postmark-Server-Token' => $token{$storename}} => json => {
-	From => "hello\@$storename.ru",
+my $tx = $ua->post('http://api.postmarkapp.com/email' => {'X-Postmark-Server-Token' => $token} => json => {
+	From => "hello\@nastartshop.ru",
 	To => $rcpt,
 	Subject => $subject,
 	HtmlBody => '',
 	TextBody => $mb_txt,
-	ReplyTo => "hello\@$storename.ru",
+	ReplyTo => "hello\@nastartshop.ru",
 	});
 print $tx->res->body;
 };
@@ -67,17 +63,12 @@ print $tx->res->body;
 sub StatusTemplate(){
 my %dict = (
 	courier => 'курьерская доставка (Красноярск)',
-	store => "самостоятельно из пунктов самовывоза.\nАдреса и время работы пунктов http://www.$storename.ru/about/contacts.html",
+	store => "самостоятельно из пунктов самовывоза.\nАдреса и время работы пунктов http://www.nastartshop.ru/about/contacts.html",
 	shipping => 'транспортная компания (Россия)',
 	cash => 'наличный платеж',
 	check => 'банковский перевод',
 	yamoney => 'ПС Яндекс.Деньги',
 	credit => 'Оплата в кредит',
-);
-
-my %cyr_storename = (
-	nastartshop => 'НаСтарт.РФ',
-	papatut => 'Папатут.РФ',
 );
 
 my $result = $dbi->select(
@@ -150,21 +141,21 @@ $comments
 $address
 Способ оплаты: $dict{$result->{'payment'}}
 Реквизиты и инструкцию по оплате вы можете увидеть по ссылке 
-http://www.$storename.ru/cart/payment/$result->{cartid}/
+http://www.nastartshop.ru/cart/payment/$result->{cartid}/
 
 Все варианты оплаты и доставки заказа:
-http://www.$storename.ru/about/delivery-and-payment.html
+http://www.nastartshop.ru/about/delivery-and-payment.html
 
 Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.
 Условия предоставления скидок размещены на странице http://www.nastartshop.ru/about/discounts.html
 -- 
-Интернет-магазин "$cyr_storename{$storename}"
+Интернет-магазин "НаСтарт.РФ"
 Мы работаем:
  - Понедельник-Пятница c 11:00 до 18:00
  - Суббота с 12:00 до 16:00
 телефон: 8-(391)-203-03-10
-почта: hello\@$storename.ru
-http://www.$storename.ru/
+почта: hello\@nastartshop.ru
+http://www.nastartshop.ru/
 EOF
 
 #print $subject;
