@@ -37,7 +37,7 @@ sub CheckAll{
 my $result = $dbi->select(
 	table => 'orders',
 	column => ['cartid','storename'],
-	where => {status => 0, mailer => 0}
+	where => {status => [0, 1], mailer => 0}
 );
 while(my $row = $result->fetch){
 	$cartid = $row->[0];
