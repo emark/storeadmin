@@ -128,6 +128,7 @@ if($file_handle){
 	#drop column captions
 	my $schema_upload = shift @source_file;
 	chop $schema_upload;
+	chop $schema_upload if $lb;
 	open (WFILE,"> upload/source.csv") || die "Can't open source file for writing";
 	foreach my $key(@source_file){
 		print WFILE "$key"};
