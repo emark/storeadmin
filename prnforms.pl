@@ -254,7 +254,7 @@ CSS
 	print "<h3 align=left>Накладная № $order->{id}</h3>";
 	print table({-width=>100},
 		Tr({-valign => 'top'},[
-			td(["Заказчик: $order->{person}, $order->{tel}<br />Адрес: $order->{address}<br/>Доставка: $delivery{$order->{delivery}} Оплата: $payment{$order->{payment}}<br/>Комментарий: $order->{comments}",'Кол. мест:<br/>Маркер:']),
+			td(["Заказчик: $order->{person}, $order->{tel}<br />Адрес: $order->{address}<br/>Доставка: $delivery{$order->{delivery}} Оплата: $payment{$order->{payment}}<br/>Комментарий: $order->{comments}",'Кол. мест:<br/><br/>Маркер']),
 		]),
 	);
 
