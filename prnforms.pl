@@ -252,7 +252,11 @@ CSS
 	print '<div id="content">';
 	print p({-class => 'small'},'ООО "Электронный маркетинг" ОГРН 1092468020743, т. 8(391)203-03-10');
 	print "<h3 align=left>Накладная № $order->{id}</h3>";
-	print p("Заказчик: $order->{person}, $order->{tel}<br />Адрес: $order->{address}<br/>Доставка: $delivery{$order->{delivery}} Оплата: $payment{$order->{payment}}<br/>Комментарий: $order->{comments}");
+	print table({-width=>100},
+		Tr({-valign => 'top'},[
+			td(["Заказчик: $order->{person}, $order->{tel}<br />Адрес: $order->{address}<br/>Доставка: $delivery{$order->{delivery}} Оплата: $payment{$order->{payment}}<br/>Комментарий: $order->{comments}",'Кол. мест:<br/>Маркер:']),
+		]),
+	);
 
 	my $items = $dbi->select(
         table => 'items',
@@ -294,7 +298,7 @@ CSS
 <br/>
 <hr>
 <table border=0>
-<tr valign=top><td>Заказ:<br/><br/>Доставка:<br/><br/>Установка:<br/><br/>Итого:</td><td>Сдача:<br/><br/>с суммы:</td><td align=center>m.emrk.ru<br/><img src=\"http://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=http://m.emrk.ru/?cid=$cartid\"><br/>$cartid</td></tr>
+<tr valign=top><td>Заказ:<br/><br/>Доставка:<br/><br/>Установка:<br/><br/>Итого:</td><td>Сдача:<br/><br/>с суммы:</td><td align=center><img src=\"http://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=http://store.emrk.ru/cgi-bin/storeadmin/mobile.pl?cid=$cartid\"><br/>$cartid</td></tr>
 </table>
 SERVICEINFO
 	};
