@@ -20,7 +20,7 @@ my $dbi = DBIx::Custom->connect(
 
 $dbi->do('SET NAMES utf8');
 
-print header(-charset => 'utf8', -type => 'text');
+print header(-charset => 'utf8', -type => 'text/html');
 
 my $cartid = param('cartid') || 0;
 

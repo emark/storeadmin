@@ -24,7 +24,7 @@ my $rcpt = '';
 my $subject = '';
 my $mb_txt = '';
 
-print header(-charset => 'utf8', -type => 'text');
+print header(-charset => 'utf8', -type => 'text/html');
 
 if($cartid){
 	&StatusTemplate($cartid);
