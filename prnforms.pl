@@ -438,7 +438,7 @@ sub TradeOrder(){
 		where => {cartid => $cartid},
     );
 
-    print '<table border=1 cellpadding=5 cellspacing=0>';
+    print '<table border=1 cellpadding=5 cellspacing=0 width="100%" style="font-size:12px;font-family:Arial;">';
 	print '<tr><th>№</th><th>Наименование</th><th>Арт.</th><th>Кол-во</th><th>Дисконт, %</th><th>Цена, руб.</th><th>Скидка, %</th><th>Сумма, руб.</th></tr>';
 	my $n = 1;
 	my $total = 0;
