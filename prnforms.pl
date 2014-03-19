@@ -119,20 +119,35 @@ sub CreditOrder(){
 		$category{$row->{productid}} = $row->{caption};
 	};
 
+	my $discount = $dbi->select(
+		column => 'discount',
+		table => 'discounts',
+		where => {name => $order->{discount}},
+	)->value;
+
 	my $totalsum = 0;
 	my $firstpayment = 0;
 	my %items = ();
 
-	while (my $row = $items->fetch_hash){
-		my $pcsprice = $row->{count}*$row->{price};
-		$pcsprice = sprintf("%d",$pcsprice - $row->{count}*($row->{price}*($row->{discount}/100))) if $row->{discount};
-		$totalsum = $totalsum + $pcsprice;
+	while (my $item = $items->fetch_hash){
+		my $pcsprice = $item->{price};
+	
+		if($discount && $item->{discount} == 0){
+	
+			if($discount <1){
+			
+				my $discount_pcsprice = sprintf("%d",$item->{price}*$discount);
+				$pcsprice = $pcsprice - $discount_pcsprice;
+			};
+		};
 
-		my $price = $row->{price};
-		$price = sprintf("%d",$row->{price}-$row->{price}*($row->{discount}/100)) if $row->{discount};
+		$totalsum = $totalsum + $pcsprice*$item->{count};
 
-		$items{$row->{productid}} = "Наименование: $row->{title}\nКатегория товара: $category{$row->{productid}}\nКоличество: $row->{count}\nЦена за единицу: $price.00\n";
+		$items{$item->{productid}} = "Наименование: $item->{title}\nКатегория товара: $category{$item->{productid}}\nКоличество: $item->{count}\nЦена за единицу: $pcsprice.00\n";
 	};
+
+	$totalsum = $totalsum-$discount if ($discount > 1);
+
 	$firstpayment = sprintf("%d",$totalsum/10);
 	
 	print '<pre>';
@@ -401,24 +416,24 @@ sub TradeOrder(){
 	$curdate[4] = $curdate[4] + 1;
 	$curdate[4] = '0'.$curdate[4] if $curdate[4] < 10;
 	$curdate[3] = '0'.$curdate[3] if $curdate[3] < 10;
+	my @months = ('','января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря');
 
-	my $result = $dbi->select(
+	my $order = $dbi->select(
 		table => 'orders',
 		where => {cartid => $cartid}
-	);
-	$result = $result->fetch_hash;
+	)->fetch_hash;
 
 	print '<div id="content">';
-	print p({-align=>'right'},'Приложение №1 <br/>к договору поставки № _____ - _____ <br/>от "____" _______________ 20____ г.');
+	print p({-align=>'right'},"Приложение №1 <br/>к договору поставки № П-$order->{id} <br/> от \"$curdate[3]\" $months[$curdate[4]] $curdate[5] г.");
 	print p({-align=>"center"},'Заказ на поставку товаров');
 	my $discount_rate = 0;
 	$discount_rate = $dbi->select(
 			column => 'discount',
 			table => 'discounts',
-			where => {name => $result->{discount}},
-	)->value if ($result->{discount});
+			where => {name => $order->{discount}},
+	)->value if ($order->{discount});
 
-	$result = $dbi->select(
+	my $items = $dbi->select(
         table => 'items',
 		where => {cartid => $cartid},
     );
@@ -430,7 +445,7 @@ sub TradeOrder(){
 	my $base_sum = 0;
 	my $discount_base = 0;
 	my $item_discount_sum = 0;
-    while(my $row = $result->fetch_hash){
+    while(my $row = $items->fetch_hash){
         print '<tr>';
 		print "<td align=center>$n</td>";
 		print "<td>$row->{title}</td>";
@@ -468,10 +483,10 @@ sub TradeOrder(){
 
     print '</table>';
 	print p("Общая сумма заказа $total (_____________________________________________________<br/><br/>____________________________________________________________) руб. 00 коп.");
-	print p('Дата поставки товара не позднее "____" _______________ 20____ г.');
+	print p("Дата поставки товара не позднее \"$curdate[3]\" $months[$curdate[4]+1] $curdate[5] г.");
 
 	print "<p>Гарантия на товары составляет 6 месяцев со дня продажи, если не указан иной срок.</b><br />Скидка не распространяется на товары с дисконтом. Условия предоставления скидок размещены на интернет-странице по адресу http://www.nastartshop.ru/about/discounts.html";
 	print '</p><table width=100%>';
-	print '<tr><td>Поставщик:<br/><br/>_____________ /__________________</td><td>Покупатель:<br/><br/>_____________ /__________________</td></tr>';
+	print '<tr><td>Поставщик:<br/><br/>_____________ /__________________</td><td>Покупатель:<br/><br/>_____________ / '.$order->{person}.'</td></tr>';
 	print '</table></div>';
 };
