@@ -6,7 +6,6 @@ use lib "/home/hosting_locumtest/usr/local/lib/perl5";
 use warnings;
 use CGI qw/:standard/;
 use DBIx::Custom;
-use utf8;
 use v5.10.1;
 require 'pkg/Common.pm';
 
@@ -47,6 +46,8 @@ for ($template){
 		&RecipientInformation;
 	}elsif(/TradeOrder/){
 		&TradeOrder;
+	}elsif(/Articul/){
+		&PrintArticul;
 	}else{
 		print p("Print form {$template} not found");	
 	};
@@ -492,4 +493,76 @@ sub TradeOrder(){
 	print '</p><table width=100%>';
 	print '<tr><td>Поставщик:<br/><br/>_____________ /__________________</td><td>Покупатель:<br/><br/>_____________ / '.$order->{person}.'</td></tr>';
 	print '</table></div>';
+};
+
+sub PrintArticul {
+
+	my @id = param('id');
+	my @title = param('title');
+	my @url = param('url');
+	my @caturl = param('caturl');
+	my @count = param('count');
+	my $max_cols = param('max_cols'); #Empty value for auto settings
+
+	my $n = 0;
+	my $count_total = 0;
+	my %articul = ();
+	my $col = 0;
+	my $tip = 'Совет: ';
+
+	foreach my $key (@id){
+		
+		if ($count[$n] > 0){
+		
+			$articul{$key} = {
+				'title' => $title[$n],
+				'url' => 'http://www.nastartshop.ru/catalog/'.$caturl[$n].'/'.$url[$n].'.html',
+				'count' => $count[$n],
+			};
+				
+			$count_total = $count_total+$count[$n];
+		};
+
+		$n++;
+	};
+
+	#Selection page format
+	if ($count_total <= 9){ #Page format A5
+	
+		$tip = $tip."рекомендуется выбрать формат страницы А5";
+		$max_cols = 3 unless $max_cols;
+	}else{ #Page format 
+	
+		$tip = $tip."рекомендуется выбрать формат страницы А4";
+		$max_cols = 5 unless $max_cols;
+	};
+
+	print "<script script type=\"text/javascript\">alert ('$tip');</script>";
+
+	print '<table style="border-collapse: collapse">';
+
+	foreach my $id (keys %articul){
+	
+		$n = 0;
+		while ($n < $articul{$id}{count}){
+
+			print "\n<tr>" if $col == 0;
+			print '<td style="border: 1px solid; text-align: center; vertical-align: top; font-family: Arial; padding: 2px">';
+			print "<h3>$id</h3>$articul{$id}{title}<br><img src=\"http://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=$articul{$id}{url}\">";
+			print '</td>';
+
+			$col++;
+			if ($col == $max_cols) {
+
+				print "\n</tr>";
+				$col = 0;
+			};
+		
+			$n++;
+		};
+
+
+	};
+
+	print '</table>';
 };
